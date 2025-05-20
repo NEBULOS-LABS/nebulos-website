@@ -18,9 +18,9 @@ export default function Problem() {
       <div className="absolute bottom-1/3 -right-40 w-80 h-80 bg-[#00eeff]/20 blur-[100px] rounded-full" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
-        {/* Lamp component */}
+        {/* Lamp Component */}
         <ProblemLamp />
-
+        <div className="mb-24"></div> {/* Extra spacing after lamp */}
         <motion.div
           variants={staggerContainer()}
           initial="hidden"
@@ -32,7 +32,6 @@ export default function Problem() {
             Your growth is bottlenecked by code you don't have time to write
           </motion.h2>
         </motion.div>
-
         {/* Problem points */}
         <motion.div
           variants={staggerContainer(0.1)}
@@ -85,7 +84,6 @@ export default function Problem() {
             </motion.div>
           ))}
         </motion.div>
-
         {/* Hidden cost section */}
         <motion.div
           variants={fadeIn("up")}
