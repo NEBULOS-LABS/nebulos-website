@@ -4,6 +4,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { fadeIn, staggerContainer } from "@/lib/animations";
 import Image from "next/image";
+import { ProblemLamp } from "./ui/problem-lamp";
 
 export default function Problem() {
   return (
@@ -17,6 +18,9 @@ export default function Problem() {
       <div className="absolute bottom-1/3 -right-40 w-80 h-80 bg-[#00eeff]/20 blur-[100px] rounded-full" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
+        {/* Lamp component */}
+        <ProblemLamp />
+
         <motion.div
           variants={staggerContainer()}
           initial="hidden"

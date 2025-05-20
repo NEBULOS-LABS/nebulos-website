@@ -50,6 +50,15 @@ module.exports = {
           pink: "rgb(var(--nebula-pink))",
           purple: "rgb(var(--nebula-purple))",
         },
+        cyan: {
+          400: "#22d3ee",
+          500: "#06b6d4",
+        },
+        slate: {
+          300: "#cbd5e1",
+          500: "#64748b",
+          950: "#020617",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -73,12 +82,30 @@ module.exports = {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-10px)" },
         },
+        "text-gradient": {
+          "0%, 100%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+        },
+        "aurora-glow": {
+          "0%": { opacity: 0.3, transform: "translate(0%, 0%) scale(1)" },
+          "25%": { opacity: 0.4, transform: "translate(-2%, 2%) scale(1.05)" },
+          "50%": { opacity: 0.3, transform: "translate(0%, 0%) scale(1)" },
+          "75%": { opacity: 0.4, transform: "translate(2%, -2%) scale(1.05)" },
+          "100%": { opacity: 0.3, transform: "translate(0%, 0%) scale(1)" },
+        },
+        aurora: {
+          "0%, 100%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "gradient-flow": "gradient-flow 10s ease infinite",
         float: "float 5s ease-in-out infinite",
+        "text-gradient": "text-gradient 8s ease infinite",
+        "aurora-glow": "aurora-glow 10s ease-in-out infinite",
+        aurora: "aurora 10s ease infinite",
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
