@@ -50,16 +50,20 @@ export default function Hero() {
             className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-6"
           >
             <Link href="#contact" className="btn-primary-lg group">
-              Start Your Free Strategy Call
-              <span className="group-hover:translate-x-1 transition-transform duration-150 ease-in-out ml-1">
-                →
+              <span className="relative z-10">
+                Start Your Free Strategy Call
+                <span className="group-hover:translate-x-1 transition-transform duration-150 ease-in-out ml-1">
+                  →
+                </span>
               </span>
             </Link>
 
             <Link href="#work" className="btn-secondary-lg group">
-              See Our Work
-              <span className="group-hover:translate-y-1 transition-transform duration-150 ease-in-out ml-1">
-                ↓
+              <span className="relative z-10">
+                See Our Work
+                <span className="group-hover:translate-y-1 transition-transform duration-150 ease-in-out ml-1">
+                  ↓
+                </span>
               </span>
             </Link>
           </motion.div>

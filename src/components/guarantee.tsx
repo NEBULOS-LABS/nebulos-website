@@ -112,7 +112,9 @@ export default function Guarantee() {
             className="text-center mt-16"
           >
             <a href="#contact" className="btn-primary-lg inline-block">
-              Risk-Free Project Assessment →
+              <span className="relative z-10">
+                Risk-Free Project Assessment →
+              </span>
             </a>
           </motion.div>
         </motion.div>

@@ -1,4 +1,4 @@
-// File: C:\Users\16476\Desktop\Testing\NEBULOS_WEBSITE\src\app\layout.tsx
+// File: C:\Users\16476\Desktop\Active_Projects\NEBULOS_WEBSITE\src\app\layout.tsx
 import * as entry from '../../../src/app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
