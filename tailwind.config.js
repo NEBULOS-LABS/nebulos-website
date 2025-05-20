@@ -50,15 +50,6 @@ module.exports = {
           pink: "rgb(var(--nebula-pink))",
           purple: "rgb(var(--nebula-purple))",
         },
-        cyan: {
-          400: "#22d3ee",
-          500: "#06b6d4",
-        },
-        slate: {
-          300: "#cbd5e1",
-          500: "#64748b",
-          950: "#020617",
-        },
       },
       borderRadius: {
         lg: "var(--radius)",
