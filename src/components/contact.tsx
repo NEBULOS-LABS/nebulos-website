@@ -3,7 +3,9 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { fadeIn, staggerContainer } from "@/lib/animations";
-import { Send } from "lucide-react";
+import { Send, Mic, FileText, RefreshCw } from "lucide-react";
+import { AIVoiceInput } from "@/components/ui/ai-voice-input";
+import { cn } from "@/lib/utils";
 
 export default function Contact() {
   const [formState, setFormState] = useState({
@@ -14,6 +16,10 @@ export default function Contact() {
     submitted: false,
     error: false,
   });
+
+  const [inputMethod, setInputMethod] = useState<"form" | "voice">("form");
+  const [voiceData, setVoiceData] = useState<string | null>(null);
+  const [isProcessingVoice, setIsProcessingVoice] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -32,6 +38,48 @@ export default function Contact() {
       ...formState,
       submitted: true,
     });
+  };
+
+  const handleVoiceStop = (duration: number) => {
+    if (duration > 2) {
+      // Only process if the recording is longer than 2 seconds
+      setIsProcessingVoice(true);
+
+      // Simulate processing with LLM
+      setTimeout(() => {
+        // In a real implementation, this would be the result from an LLM processing the audio
+        setVoiceData(
+          "Hi, my name is Alex Johnson from Acme Solutions. We're looking to build a new SaaS platform for customer relationship management. Please reach out to me at alex.johnson@acme.com to discuss our project requirements."
+        );
+        setIsProcessingVoice(false);
+      }, 2000);
+    }
+  };
+
+  const extractFormDataFromVoice = () => {
+    // This would be handled by a real LLM in production
+    return {
+      name: "Alex Johnson",
+      email: "alex.johnson@acme.com",
+      company: "Acme Solutions",
+      message:
+        "We're looking to build a new SaaS platform for customer relationship management. Please reach out to discuss our project requirements.",
+    };
+  };
+
+  const applyVoiceData = () => {
+    if (voiceData) {
+      const extractedData = extractFormDataFromVoice();
+      setFormState({
+        ...formState,
+        ...extractedData,
+      });
+      setInputMethod("form");
+    }
+  };
+
+  const resetVoiceData = () => {
+    setVoiceData(null);
   };
 
   return (
@@ -70,91 +118,188 @@ export default function Contact() {
                 <div className="relative bg-black/70 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
                   {!formState.submitted ? (
                     <>
-                      <h3 className="text-2xl font-bold text-white mb-6">
-                        Start the Conversation
-                      </h3>
-                      <form onSubmit={handleSubmit} className="space-y-6">
-                        <div>
-                          <label
-                            htmlFor="name"
-                            className="block text-sm font-medium text-gray-400 mb-2"
-                          >
-                            Your Name
-                          </label>
-                          <input
-                            type="text"
-                            name="name"
-                            id="name"
-                            value={formState.name}
-                            onChange={handleChange}
-                            required
-                            className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-[#ff00ff] focus:border-transparent transition duration-200"
-                            placeholder="Jane Smith"
-                          />
-                        </div>
-                        <div>
-                          <label
-                            htmlFor="email"
-                            className="block text-sm font-medium text-gray-400 mb-2"
-                          >
-                            Email Address
-                          </label>
-                          <input
-                            type="email"
-                            name="email"
-                            id="email"
-                            value={formState.email}
-                            onChange={handleChange}
-                            required
-                            className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-[#ff00ff] focus:border-transparent transition duration-200"
-                            placeholder="jane@company.com"
-                          />
-                        </div>
-                        <div>
-                          <label
-                            htmlFor="company"
-                            className="block text-sm font-medium text-gray-400 mb-2"
-                          >
-                            Company (Optional)
-                          </label>
-                          <input
-                            type="text"
-                            name="company"
-                            id="company"
-                            value={formState.company}
-                            onChange={handleChange}
-                            className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-[#ff00ff] focus:border-transparent transition duration-200"
-                            placeholder="Acme Inc."
-                          />
-                        </div>
-                        <div>
-                          <label
-                            htmlFor="message"
-                            className="block text-sm font-medium text-gray-400 mb-2"
-                          >
-                            Tell us about your project
-                          </label>
-                          <textarea
-                            name="message"
-                            id="message"
-                            rows={4}
-                            value={formState.message}
-                            onChange={handleChange}
-                            required
-                            className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-[#ff00ff] focus:border-transparent transition duration-200"
-                            placeholder="I'm looking to build..."
-                          />
-                        </div>
-                        <div>
+                      <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-2xl font-bold text-white">
+                          Start the Conversation
+                        </h3>
+
+                        {/* Input Method Toggle */}
+                        <div className="flex bg-black/30 p-1 rounded-lg border border-white/10">
                           <button
-                            type="submit"
-                            className="w-full btn-primary py-3 flex items-center justify-center"
+                            onClick={() => setInputMethod("form")}
+                            className={cn(
+                              "py-1.5 px-3 rounded-md flex items-center text-sm font-medium transition-colors",
+                              inputMethod === "form"
+                                ? "bg-[#9900ff]/20 text-white"
+                                : "text-gray-400 hover:text-white"
+                            )}
                           >
-                            <Send className="h-5 w-5 mr-2" />
-                            Schedule Free Strategy Call
+                            <FileText className="w-4 h-4 mr-1.5" />
+                            Form
+                          </button>
+                          <button
+                            onClick={() => {
+                              setInputMethod("voice");
+                              resetVoiceData();
+                            }}
+                            className={cn(
+                              "py-1.5 px-3 rounded-md flex items-center text-sm font-medium transition-colors",
+                              inputMethod === "voice"
+                                ? "bg-[#9900ff]/20 text-white"
+                                : "text-gray-400 hover:text-white"
+                            )}
+                          >
+                            <Mic className="w-4 h-4 mr-1.5" />
+                            Voice
                           </button>
                         </div>
-                      </form>
+                      </div>
+
+                      {inputMethod === "form" ? (
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                          <div>
+                            <label
+                              htmlFor="name"
+                              className="block text-sm font-medium text-gray-400 mb-2"
+                            >
+                              Your Name
+                            </label>
+                            <input
+                              type="text"
+                              name="name"
+                              id="name"
+                              value={formState.name}
+                              onChange={handleChange}
+                              required
+                              className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-[#ff00ff] focus:border-transparent transition duration-200"
+                              placeholder="Jane Smith"
+                            />
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="email"
+                              className="block text-sm font-medium text-gray-400 mb-2"
+                            >
+                              Email Address
+                            </label>
+                            <input
+                              type="email"
+                              name="email"
+                              id="email"
+                              value={formState.email}
+                              onChange={handleChange}
+                              required
+                              className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-[#ff00ff] focus:border-transparent transition duration-200"
+                              placeholder="jane@company.com"
+                            />
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="company"
+                              className="block text-sm font-medium text-gray-400 mb-2"
+                            >
+                              Company (Optional)
+                            </label>
+                            <input
+                              type="text"
+                              name="company"
+                              id="company"
+                              value={formState.company}
+                              onChange={handleChange}
+                              className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-[#ff00ff] focus:border-transparent transition duration-200"
+                              placeholder="Acme Inc."
+                            />
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="message"
+                              className="block text-sm font-medium text-gray-400 mb-2"
+                            >
+                              Tell us about your project
+                            </label>
+                            <textarea
+                              name="message"
+                              id="message"
+                              rows={4}
+                              value={formState.message}
+                              onChange={handleChange}
+                              required
+                              className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-[#ff00ff] focus:border-transparent transition duration-200"
+                              placeholder="I'm looking to build..."
+                            />
+                          </div>
+                          <div>
+                            <button
+                              type="submit"
+                              className="w-full btn-primary py-3 flex items-center justify-center"
+                            >
+                              <Send className="h-5 w-5 mr-2" />
+                              Schedule Free Strategy Call
+                            </button>
+                          </div>
+                        </form>
+                      ) : (
+                        <div className="space-y-6">
+                          <div className="bg-black/30 border border-white/10 rounded-lg p-4">
+                            <p className="text-gray-300 mb-4 text-center">
+                              Tell us about yourself, your project, and how to
+                              contact you.
+                            </p>
+
+                            {!voiceData ? (
+                              <div className="bg-black/50 rounded-lg p-4">
+                                <AIVoiceInput
+                                  onStart={() => {}}
+                                  onStop={handleVoiceStop}
+                                />
+                              </div>
+                            ) : (
+                              <div className="space-y-4">
+                                <div className="bg-black/50 border border-white/10 rounded-lg p-4">
+                                  <p className="text-white text-sm">
+                                    {voiceData}
+                                  </p>
+                                </div>
+                                <div className="flex space-x-3">
+                                  <button
+                                    onClick={resetVoiceData}
+                                    className="flex-1 border border-white/20 bg-black/50 text-white rounded-lg py-2 flex items-center justify-center hover:bg-black/70 transition-colors"
+                                  >
+                                    <RefreshCw className="w-4 h-4 mr-2" />
+                                    Record Again
+                                  </button>
+                                  <button
+                                    onClick={applyVoiceData}
+                                    className="flex-1 bg-gradient-to-r from-[#9900ff] to-[#00eeff] text-white rounded-lg py-2 flex items-center justify-center hover:opacity-90 transition-opacity"
+                                  >
+                                    <FileText className="w-4 h-4 mr-2" />
+                                    Use This Data
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+
+                            {isProcessingVoice && (
+                              <div className="mt-4 flex justify-center items-center text-white">
+                                <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
+                                Processing your message...
+                              </div>
+                            )}
+                          </div>
+
+                          {!voiceData && (
+                            <div>
+                              <button
+                                onClick={() => setInputMethod("form")}
+                                className="w-full border border-white/20 bg-black/50 text-white rounded-lg py-3 flex items-center justify-center hover:bg-black/70 transition-colors"
+                              >
+                                <FileText className="h-5 w-5 mr-2" />
+                                Switch to Form Input
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </>
                   ) : (
                     <div className="text-center py-12">
