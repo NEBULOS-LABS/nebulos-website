@@ -22,19 +22,24 @@ export default function Navbar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 w-full px-4 sm:px-6 md:px-8 pt-6">
-      <div className="absolute left-1/2 -translate-x-1/2 w-full max-w-7xl px-3 sm:px-0">
-        {/* Left half circle */}
-        <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-8 h-16 bg-gradient-to-r from-[#9900ff]/80 to-[#ff00ff]/80 rounded-l-full blur-[1px] hidden md:block" />
+      {/* Modified container for the half-circle decorative elements */}
+      <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 w-full max-w-5xl select-none">
+        {/* More subtle left decorative accent */}
+        <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-5 h-12 opacity-30 hidden md:block">
+          <div className="w-full h-full rounded-l-full bg-[#9900ff]/25 backdrop-blur-sm" />
+        </div>
 
-        {/* Right half circle */}
-        <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-8 h-16 bg-gradient-to-l from-[#9900ff]/80 to-[#00eeff]/80 rounded-r-full blur-[1px] hidden md:block" />
+        {/* More subtle right decorative accent */}
+        <div className="absolute -right-1 top-1/2 -translate-y-1/2 w-5 h-12 opacity-30 hidden md:block">
+          <div className="w-full h-full rounded-r-full bg-[#00eeff]/25 backdrop-blur-sm" />
+        </div>
       </div>
 
       <motion.div
         className={cn(
           "mx-auto max-w-6xl transition-all duration-300 ease-in-out border border-white/10 floating-navbar",
           scrolled
-            ? "backdrop-blur-xl bg-black/70 shadow-[0_8px_32px_rgba(0,0,0,0.4)] shadow-[#9900ff]/10"
+            ? "backdrop-blur-xl bg-black/70 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
             : "backdrop-blur-md bg-black/30 shadow-[0_8px_32px_rgba(0,0,0,0.2)]",
           "rounded-full overflow-hidden"
         )}
@@ -63,18 +68,18 @@ export default function Navbar() {
                 }}
                 whileHover={{ scale: 1.1 }}
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-[#9900ff] via-[#ff00ff] to-[#00eeff] rounded-full opacity-70 blur-md" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#9900ff] via-[#ff00ff] to-[#00eeff] rounded-full opacity-70 blur-[2px]" />
                 <div className="absolute inset-0 bg-gradient-to-r from-[#9900ff] via-[#ff00ff] to-[#00eeff] rounded-full opacity-100" />
                 <div className="absolute inset-0 bg-black/50 rounded-full m-1.5" />
                 <span className="relative z-10 text-white font-bold text-lg">
                   N
                 </span>
 
-                {/* Animated glow effect */}
+                {/* Animated glow effect - reduced blur and opacity */}
                 <motion.div
-                  className="absolute -inset-1 bg-gradient-to-r from-[#9900ff]/40 via-[#ff00ff]/40 to-[#00eeff]/40 rounded-full blur-md"
+                  className="absolute -inset-1 bg-gradient-to-r from-[#9900ff]/30 via-[#ff00ff]/30 to-[#00eeff]/30 rounded-full blur-sm"
                   animate={{
-                    opacity: [0.5, 0.8, 0.5],
+                    opacity: [0.3, 0.5, 0.3],
                     scale: [1, 1.05, 1],
                   }}
                   transition={{
