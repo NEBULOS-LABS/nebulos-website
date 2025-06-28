@@ -2,7 +2,6 @@ import { ReactNode } from "react";
 import { ArrowRightIcon } from "@radix-ui/react-icons";
 
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 
 const BentoGrid = ({
   children,
@@ -14,7 +13,7 @@ const BentoGrid = ({
   return (
     <div
       className={cn(
-        "grid w-full auto-rows-[20rem] sm:auto-rows-[22rem] grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4",
+        "grid w-full auto-rows-[22rem] grid-cols-1 md:grid-cols-3 gap-4",
         className
       )}
     >
@@ -31,6 +30,9 @@ const BentoCard = ({
   description,
   href,
   cta,
+  badge,
+  metric,
+  price,
 }: {
   name: string;
   className: string;
@@ -39,11 +41,14 @@ const BentoCard = ({
   description: string;
   href: string;
   cta: string;
+  badge?: string;
+  metric?: string;
+  price?: string;
 }) => (
   <div
     key={name}
     className={cn(
-      "group relative col-span-1 sm:col-span-2 lg:col-span-3 flex flex-col justify-between overflow-hidden rounded-2xl",
+      "bento-card group relative col-span-1 md:col-span-3 flex flex-col justify-between overflow-hidden rounded-2xl",
       // NEBULOS dark theme with glassmorphism
       "bg-black/70 backdrop-blur-md border border-white/10",
       "shadow-[0_8px_32px_rgba(0,0,0,0.4)]",
@@ -62,6 +67,15 @@ const BentoCard = ({
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-[#9900ff]/10 via-[#ff00ff]/10 to-[#00eeff]/10" />
     </div>
 
+    {/* Badge */}
+    {badge && (
+      <div className="absolute top-4 right-4 z-20">
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#ff00ff]/20 text-[#ff00ff] border border-[#ff00ff]/30 backdrop-blur-sm">
+          {badge}
+        </span>
+      </div>
+    )}
+
     {/* Content */}
     <div className="relative z-10 flex transform-gpu flex-col gap-3 p-6 transition-all duration-300 group-hover:-translate-y-2">
       <div className="flex items-center gap-3">
@@ -72,13 +86,29 @@ const BentoCard = ({
             <Icon className="h-10 w-10 text-[#ff00ff]" />
           </div>
         </div>
-        <h3 className="text-xl font-bold text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-[#9900ff] group-hover:via-[#ff00ff] group-hover:to-[#00eeff] transition-all duration-300">
-          {name}
-        </h3>
+        <div className="flex-1">
+          <h3 className="text-xl font-bold text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-[#9900ff] group-hover:via-[#ff00ff] group-hover:to-[#00eeff] transition-all duration-300">
+            {name}
+          </h3>
+          {price && (
+            <p className="text-sm text-gray-400 mt-1">
+              Starting at{" "}
+              <span className="text-[#00eeff] font-semibold">{price}</span>
+            </p>
+          )}
+        </div>
       </div>
-      <p className="text-gray-300 group-hover:text-gray-200 transition-colors duration-300 max-w-lg leading-relaxed">
+      <p className="text-gray-300 group-hover:text-gray-200 transition-colors duration-300 max-w-lg leading-relaxed text-sm">
         {description}
       </p>
+
+      {/* Metric */}
+      {metric && (
+        <div className="mt-2 inline-flex items-center gap-2 text-xs">
+          <div className="w-2 h-2 rounded-full bg-[#00eeff] animate-pulse"></div>
+          <span className="text-[#00eeff] font-medium">{metric}</span>
+        </div>
+      )}
     </div>
 
     {/* CTA Button */}
@@ -87,7 +117,8 @@ const BentoCard = ({
         <a
           href={href}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full 
-          bg-white/5 hover:bg-white/10 border border-white/20 hover:border-white/30
+          bg-gradient-to-r from-[#9900ff]/20 to-[#00eeff]/20 hover:from-[#9900ff]/30 hover:to-[#00eeff]/30 
+          border border-white/20 hover:border-white/30
           text-white text-sm font-medium backdrop-blur-sm
           transition-all duration-200 hover:scale-105 hover:shadow-md hover:shadow-[#ff00ff]/20"
         >
