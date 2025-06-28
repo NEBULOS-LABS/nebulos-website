@@ -1,0 +1,475 @@
+// Footer SCSS Module - Inspired by award-winning websites
+// Contains styles scoped only to the footer section
+
+.footerSection {
+  position: relative;
+  background: #000;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+
+  // Award-winning gradient background inspired by GitHub
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(
+        circle at 25% 25%,
+        rgba(153, 0, 255, 0.1),
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 75% 75%,
+        rgba(0, 238, 255, 0.1),
+        transparent 50%
+      );
+    z-index: 1;
+  }
+
+  // Animated grid pattern inspired by Vercel
+  .gridPattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.03;
+    background-image: linear-gradient(
+        rgba(255, 255, 255, 0.1) 1px,
+        transparent 1px
+      ),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: 2;
+    animation: gridMove 20s linear infinite;
+  }
+
+  @keyframes gridMove {
+    0% {
+      transform: translate(0, 0);
+    }
+    100% {
+      transform: translate(50px, 50px);
+    }
+  }
+}
+
+// Main footer container inspired by Apple's clean design
+.footerContainer {
+  position: relative;
+  z-index: 10;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px 24px 40px;
+
+  // Top border glow effect
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #ff00ff, transparent);
+    opacity: 0.8;
+  }
+}
+
+// Logo and brand section inspired by Linear
+.brandSection {
+  margin-bottom: 60px;
+
+  .logoContainer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+
+    .logoIcon {
+      position: relative;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #9900ff, #ff00ff, #00eeff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 32px rgba(153, 0, 255, 0.3);
+
+      &::before {
+        content: "N";
+        color: #fff;
+        font-weight: 700;
+        font-size: 20px;
+      }
+
+      &::after {
+        content: "";
+        position: absolute;
+        inset: 2px;
+        background: rgba(0, 0, 0, 0.8);
+        border-radius: 10px;
+        z-index: -1;
+      }
+    }
+
+    .logoText {
+      height: 28px;
+      width: auto;
+      filter: brightness(1.2);
+    }
+  }
+
+  .brandDescription {
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.6;
+    max-width: 400px;
+    margin-bottom: 32px;
+    font-size: 16px;
+  }
+
+  // Social links inspired by Discord's design
+  .socialLinks {
+    display: flex;
+    gap: 16px;
+
+    .socialLink {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.6);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+
+      &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.1),
+          transparent
+        );
+        transition: left 0.5s ease;
+      }
+
+      &:hover {
+        color: #fff;
+        border-color: rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+
+        &::before {
+          left: 100%;
+        }
+      }
+
+      // Platform-specific hover colors
+      &.twitter:hover {
+        border-color: #1da1f2;
+        color: #1da1f2;
+      }
+      &.linkedin:hover {
+        border-color: #0077b5;
+        color: #0077b5;
+      }
+      &.github:hover {
+        border-color: #fff;
+        color: #fff;
+      }
+      &.mail:hover {
+        border-color: #ff00ff;
+        color: #ff00ff;
+      }
+    }
+  }
+}
+
+// Navigation links inspired by Stripe's footer
+.navigationSection {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 40px;
+  margin-bottom: 60px;
+
+  .navColumn {
+    .navTitle {
+      color: #fff;
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 20px;
+      position: relative;
+
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: -8px;
+        left: 0;
+        width: 30px;
+        height: 2px;
+        background: linear-gradient(90deg, #ff00ff, #00eeff);
+        border-radius: 1px;
+      }
+    }
+
+    .navList {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      .navItem {
+        margin-bottom: 12px;
+
+        .navLink {
+          color: rgba(255, 255, 255, 0.6);
+          text-decoration: none;
+          font-size: 14px;
+          transition: all 0.3s ease;
+          position: relative;
+          display: inline-block;
+
+          &::before {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: linear-gradient(90deg, #ff00ff, #00eeff);
+            transition: width 0.3s ease;
+          }
+
+          &:hover {
+            color: #fff;
+            transform: translateX(4px);
+
+            &::before {
+              width: 100%;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// CTA section inspired by Framer's marketing pages
+.ctaSection {
+  background: linear-gradient(
+    135deg,
+    rgba(153, 0, 255, 0.1),
+    rgba(0, 238, 255, 0.1)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  margin-bottom: 60px;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.05),
+      transparent
+    );
+    animation: shimmer 3s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      left: -100%;
+    }
+    100% {
+      left: 100%;
+    }
+  }
+
+  .ctaTitle {
+    color: #fff;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, #fff, #ff00ff, #00eeff);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .ctaDescription {
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 24px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .ctaButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: linear-gradient(135deg, #9900ff, #ff00ff, #00eeff);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+      );
+      transition: left 0.5s ease;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(153, 0, 255, 0.4);
+
+      &::before {
+        left: 100%;
+      }
+    }
+  }
+}
+
+// Bottom section inspired by GitHub's footer
+.bottomSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  flex-wrap: wrap;
+  gap: 16px;
+
+  .copyright {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 14px;
+  }
+
+  .tagline {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 14px;
+    font-style: italic;
+
+    &::before {
+      content: "✨ ";
+    }
+  }
+
+  // Mobile responsiveness
+  @media (max-width: 768px) {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+}
+
+// Newsletter signup inspired by ConvertKit
+.newsletterSection {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 40px;
+
+  .newsletterTitle {
+    color: #fff;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .newsletterDescription {
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 24px;
+  }
+
+  .newsletterForm {
+    display: flex;
+    gap: 12px;
+
+    .emailInput {
+      flex: 1;
+      padding: 12px 16px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: #fff;
+
+      &::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+      }
+
+      &:focus {
+        outline: none;
+        border-color: #ff00ff;
+        box-shadow: 0 0 0 2px rgba(255, 0, 255, 0.2);
+      }
+    }
+
+    .subscribeButton {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #9900ff, #ff00ff);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 25px rgba(153, 0, 255, 0.4);
+      }
+    }
+
+    // Mobile responsiveness
+    @media (max-width: 640px) {
+      flex-direction: column;
+    }
+  }
+}

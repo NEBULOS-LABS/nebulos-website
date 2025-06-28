@@ -1,0 +1,381 @@
+// Contact Section SCSS Module - Inspired by award-winning websites
+// Contains styles scoped only to the contact section
+
+.contactSection {
+  position: relative;
+  background: #000;
+  overflow: hidden;
+
+  // Award-winning gradient background inspired by Linear
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(
+        circle at 20% 50%,
+        rgba(153, 0, 255, 0.15),
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 80% 20%,
+        rgba(0, 238, 255, 0.15),
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 40% 80%,
+        rgba(255, 0, 255, 0.1),
+        transparent 50%
+      );
+    z-index: 1;
+  }
+
+  // Floating particles effect inspired by Stripe
+  .floatingParticles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    pointer-events: none;
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: linear-gradient(45deg, #9900ff, #00eeff);
+      border-radius: 50%;
+      opacity: 0.3;
+      animation: float 20s infinite linear;
+
+      &:nth-child(1) {
+        left: 10%;
+        animation-delay: 0s;
+      }
+      &:nth-child(2) {
+        left: 20%;
+        animation-delay: 5s;
+      }
+      &:nth-child(3) {
+        left: 30%;
+        animation-delay: 10s;
+      }
+      &:nth-child(4) {
+        left: 40%;
+        animation-delay: 15s;
+      }
+      &:nth-child(5) {
+        left: 60%;
+        animation-delay: 2s;
+      }
+      &:nth-child(6) {
+        left: 70%;
+        animation-delay: 7s;
+      }
+      &:nth-child(7) {
+        left: 80%;
+        animation-delay: 12s;
+      }
+      &:nth-child(8) {
+        left: 90%;
+        animation-delay: 17s;
+      }
+    }
+  }
+
+  @keyframes float {
+    0% {
+      transform: translateY(100vh) scale(0);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.3;
+    }
+    90% {
+      opacity: 0.3;
+    }
+    100% {
+      transform: translateY(-100px) scale(1);
+      opacity: 0;
+    }
+  }
+}
+
+// Form container inspired by Vercel's glassmorphism
+.formContainer {
+  position: relative;
+  border-radius: 24px;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 24px;
+    padding: 2px;
+    background: linear-gradient(
+      135deg,
+      rgba(153, 0, 255, 0.3) 0%,
+      rgba(255, 0, 255, 0.2) 50%,
+      rgba(0, 238, 255, 0.3) 100%
+    );
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  &:hover::before {
+    opacity: 1;
+  }
+}
+
+// Form elements inspired by Linear's design system
+.formField {
+  position: relative;
+  margin-bottom: 24px;
+
+  .label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 8px;
+    transition: color 0.2s ease;
+  }
+
+  .input,
+  .textarea {
+    width: 100%;
+    padding: 16px 20px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 16px;
+    transition: all 0.3s ease;
+
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: #ff00ff;
+      box-shadow:
+        0 0 0 3px rgba(255, 0, 255, 0.1),
+        0 4px 20px rgba(255, 0, 255, 0.2);
+      background: rgba(0, 0, 0, 0.8);
+    }
+
+    &:focus + .label {
+      color: #ff00ff;
+    }
+  }
+
+  .textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
+}
+
+// Submit button inspired by Framer's interactive elements
+.submitButton {
+  position: relative;
+  width: 100%;
+  padding: 18px 24px;
+  background: linear-gradient(135deg, #9900ff 0%, #ff00ff 50%, #00eeff 100%);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s ease;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+    transition: left 0.5s ease;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(153, 0, 255, 0.4);
+
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// Voice input section inspired by OpenAI's interface
+.voiceSection {
+  .voiceContainer {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+
+    .voiceButton {
+      width: 80px;
+      height: 80px;
+      border: none;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #9900ff, #ff00ff);
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 30px rgba(255, 0, 255, 0.4);
+      }
+
+      &.recording {
+        animation: pulse 2s infinite;
+        background: linear-gradient(135deg, #ff0000, #ff00ff);
+      }
+    }
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 0, 255, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 0, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 0, 255, 0);
+  }
+}
+
+// Benefits section inspired by Stripe's documentation
+.benefitsSection {
+  .benefitCard {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 24px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .benefitList {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      .benefitItem {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 16px;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        .benefitBullet {
+          width: 8px;
+          height: 8px;
+          background: linear-gradient(45deg, #ff00ff, #00eeff);
+          border-radius: 50%;
+          margin-right: 12px;
+          margin-top: 6px;
+          flex-shrink: 0;
+        }
+
+        .benefitText {
+          color: rgba(255, 255, 255, 0.8);
+          line-height: 1.5;
+        }
+      }
+    }
+  }
+}
+
+// Success state inspired by Linear's success messages
+.successState {
+  text-align: center;
+  padding: 48px 24px;
+
+  .successIcon {
+    font-size: 64px;
+    margin-bottom: 24px;
+    animation: bounce 1s ease-out;
+  }
+
+  .successTitle {
+    color: #fff;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+
+  .successMessage {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+}
+
+@keyframes bounce {
+  0%,
+  20%,
+  53%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40%,
+  43% {
+    transform: translateY(-20px);
+  }
+  70% {
+    transform: translateY(-10px);
+  }
+  90% {
+    transform: translateY(-4px);
+  }
+}
