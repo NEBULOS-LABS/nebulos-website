@@ -7,7 +7,7 @@ import Problem from "@/components/problem";
 import Solution from "@/components/solution";
 import Testimonials from "@/components/testimonials";
 import Process from "@/components/process";
-import Services from "@/components/services";
+import WhatWeBuild from "@/components/what-we-build";
 import Guarantee from "@/components/guarantee";
 import FAQ from "@/components/faq";
 import Contact from "@/components/contact";
@@ -33,8 +33,8 @@ export default function Home() {
       {/* Process Section */}
       <Process />
 
-      {/* Services Section */}
-      <Services />
+      {/* What We Build Section */}
+      <WhatWeBuild />
 
       {/* Guarantee Section */}
       <Guarantee />
