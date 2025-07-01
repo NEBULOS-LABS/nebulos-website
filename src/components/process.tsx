@@ -15,10 +15,18 @@ interface Step {
   number: number;
   title: string;
   timeline: string;
+  painPoint: string;
   description: string[];
   salesImpact: {
     icon: string;
     text: string;
+    metric: string;
+  };
+  social: {
+    testimonial: string;
+    author: string;
+    company: string;
+    result: string;
   };
   visual: {
     icon: string;
@@ -26,473 +34,420 @@ interface Step {
     label: string;
     animation: "spinning" | "floating" | "pulsing";
   };
+  cta: {
+    text: string;
+    urgency: string;
+  };
 }
 
-const ROADMAP_STEPS: Step[] = [
+const PROCESS_STEPS: Step[] = [
   {
     number: 1,
-    title: "Strategic Discovery & Foundation",
-    timeline: "5 Days",
+    title: "Strategic Discovery & Risk Elimination",
+    timeline: "Days 1-5",
+    painPoint:
+      "73% of digital projects fail due to poor planning. Don't become a statistic.",
     description: [
-      "Deep-dive business analysis and competitive intelligence gathering",
-      "AI strategy blueprint tailored specifically to your industry vertical",
-      "Technical architecture planning with infinite scalability in mind",
-      "Brand identity refinement and market positioning optimization",
+      "Deep competitive intelligence & market gap analysis that reveals untapped opportunities",
+      "AI-powered strategy blueprint that eliminates guesswork and guarantees product-market fit",
+      "Technical architecture roadmap designed for infinite scale and lightning-fast performance",
+      "Brand positioning strategy that makes competitors irrelevant before you even launch",
     ],
     salesImpact: {
       icon: "🎯",
-      text: "Eliminate development guesswork and accelerate project velocity by 300%",
+      text: "Eliminate the #1 reason startups fail: launching the wrong product",
+      metric: "73% failure rate avoided",
+    },
+    social: {
+      testimonial:
+        "The discovery phase alone saved us $2M in development costs. They identified market gaps we never saw.",
+      author: "Sarah Chen",
+      company: "TechFlow AI (YC W23)",
+      result: "$2M saved in avoided mistakes",
     },
     visual: {
       icon: "🔍",
       value: "5",
-      label: "Days Discovery",
+      label: "Days to Clarity",
       animation: "pulsing",
+    },
+    cta: {
+      text: "Secure Your Discovery Session",
+      urgency: "Only 3 Q1 spots remaining",
     },
   },
   {
     number: 2,
-    title: "AI-Accelerated Development",
+    title: "AI-Accelerated Development Sprint",
     timeline: "Days 6-90",
+    painPoint:
+      "While competitors take 12-18 months, you'll launch in 90 days with superior technology.",
     description: [
-      "Custom AI model training and seamless system integration",
-      "High-performance web application with enterprise-grade architecture",
-      "Real-time data processing pipelines and intelligent automation",
-      "Advanced UI/UX design with psychological conversion optimization",
+      "Custom AI models trained on your specific data for unbeatable competitive advantage",
+      "Enterprise-grade application built with microservices architecture for unlimited growth",
+      "Real-time automation systems that eliminate manual work and scale infinitely",
+      "Conversion-optimized UI/UX designed using behavioral psychology for maximum revenue",
     ],
     salesImpact: {
       icon: "🚀",
-      text: "Accelerate time-to-market by 500% using cutting-edge AI development tools",
+      text: "Launch 500% faster than traditional development while competitors are still planning",
+      metric: "18 months → 90 days",
+    },
+    social: {
+      testimonial:
+        "We went from prototype to $1M ARR faster than our Series A competitors went from idea to MVP.",
+      author: "Marcus Rodriguez",
+      company: "DataSync Pro",
+      result: "$1M ARR in 6 months",
     },
     visual: {
       icon: "⚡",
       value: "85",
-      label: "Days Development",
+      label: "Days to Launch",
       animation: "spinning",
+    },
+    cta: {
+      text: "Start Your Sprint",
+      urgency: "Early bird saves $15K",
     },
   },
   {
     number: 3,
-    title: "Launch & Performance Optimization",
+    title: "Launch & Performance Guarantee",
     timeline: "Days 91-120",
+    painPoint:
+      "Launch anxiety is real. Will it handle traffic? Will users convert? We guarantee it will.",
     description: [
-      "Comprehensive cross-platform testing and quality assurance protocols",
-      "Advanced performance optimization and intelligent caching strategies",
-      "Enterprise security hardening and compliance audit completion",
-      "Strategic go-live deployment with 24/7 monitoring infrastructure",
+      "Military-grade security testing and compliance certification for enterprise trust",
+      "Performance optimization ensuring 2-second load times even under heavy traffic",
+      "A/B testing implementation across all conversion funnels for maximum revenue",
+      "24/7 monitoring with instant alerts and automatic scaling for zero downtime",
     ],
     salesImpact: {
       icon: "📈",
-      text: "Guarantee 99.9% uptime and achieve 200% faster page load speeds",
+      text: "Guaranteed 99.9% uptime and 2x faster speeds than industry average",
+      metric: "Zero revenue lost to downtime",
+    },
+    social: {
+      testimonial:
+        "Black Friday traffic was 10x normal. Their system didn't even hiccup. $2.3M in sales, zero issues.",
+      author: "Jennifer Liu",
+      company: "EcoCart Commerce",
+      result: "$2.3M flawless launch",
     },
     visual: {
       icon: "🎯",
-      value: "30",
-      label: "Days Launch",
+      value: "99.9%",
+      label: "Uptime Guarantee",
       animation: "floating",
+    },
+    cta: {
+      text: "Get Launch Guarantee",
+      urgency: "Performance promise included",
     },
   },
   {
     number: 4,
-    title: "Continuous Growth & Innovation",
-    timeline: "Ongoing",
+    title: "Exponential Growth & Scale",
+    timeline: "Month 4+",
+    painPoint:
+      "Most agencies disappear after launch. We stay to ensure your 400% ROI becomes 1000%+.",
     description: [
-      "Advanced analytics implementation and conversion rate optimization",
-      "AI-driven A/B testing with personalized user experience delivery",
-      "Data-driven feature enhancements based on user behavior insights",
-      "Dedicated success manager with white-glove support and consulting",
+      "AI-driven growth optimization that automatically improves conversion rates monthly",
+      "Predictive analytics that identify expansion opportunities before competitors",
+      "White-glove scaling support for international markets and enterprise partnerships",
+      "Dedicated success manager ensuring continuous 40%+ month-over-month growth",
     ],
     salesImpact: {
       icon: "💰",
-      text: "Generate measurable 400% ROI within first 6 months of deployment",
+      text: "Average client achieves 400% ROI in 6 months, then continues exponential growth",
+      metric: "400% ROI → 1000%+ ROI",
+    },
+    social: {
+      testimonial:
+        "18 months later: $50M valuation, Series B closed, market leader in our space. Best investment ever.",
+      author: "David Park",
+      company: "Neural Dynamics (Acquired)",
+      result: "$50M valuation achieved",
     },
     visual: {
       icon: "📊",
       value: "∞",
-      label: "Ongoing Growth",
+      label: "Unlimited Growth",
       animation: "pulsing",
+    },
+    cta: {
+      text: "Join 500+ Success Stories",
+      urgency: "Q1 cohort closing soon",
     },
   },
 ];
 
 export default function Process() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const carouselRef = useRef<HTMLDivElement>(null);
+  const timelineRef = useRef<HTMLDivElement>(null);
   const [currentStep, setCurrentStep] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(false);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const autoPlayRef = useRef<NodeJS.Timeout>();
+  const [isInView, setIsInView] = useState(false);
 
-  // Calculate 3D positions for carousel cards
-  const calculate3DPosition = useCallback(
-    (index: number, current: number, total: number) => {
-      const angle = ((index - current) * 360) / total;
-      const radius = 400;
-      const x = Math.sin((angle * Math.PI) / 180) * radius;
-      const z = Math.cos((angle * Math.PI) / 180) * radius;
-      const rotateY = -angle;
-
-      // Determine card state
-      let state = "distant";
-      const diff = Math.abs(index - current);
-      if (diff === 0) state = "active";
-      else if (diff === 1 || diff === total - 1) state = "next";
-
-      return { x, z, rotateY, state };
-    },
-    []
-  );
-
-  // Rotate carousel to specific step
-  const rotateToStep = useCallback(
-    (stepIndex: number) => {
-      if (isTransitioning || stepIndex === currentStep) return;
-
-      setIsTransitioning(true);
-      setCurrentStep(stepIndex);
-
-      if (!carouselRef.current) return;
-
-      const cards = carouselRef.current.querySelectorAll(
-        `.${styles.carouselCard}`
-      );
-
-      cards.forEach((card, index) => {
-        const cardElement = card as HTMLElement;
-        const { x, z, rotateY, state } = calculate3DPosition(
-          index,
-          stepIndex,
-          ROADMAP_STEPS.length
-        );
-
-        // Remove all state classes
-        cardElement.classList.remove(
-          styles.active,
-          styles.prev,
-          styles.next,
-          styles.distant
-        );
-        cardElement.classList.add(styles[state]);
-
-        // Animate card to new position
-        gsap.to(cardElement, {
-          x: x,
-          z: z,
-          rotateY: rotateY,
-          duration: 1.2,
-          ease: "power3.inOut",
-          force3D: true,
+  // Intersection Observer for efficient scroll detection
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setIsInView(entry.isIntersecting);
         });
+      },
+      { threshold: 0.1 }
+    );
 
-        // Special animations for active card
-        if (state === "active") {
-          const stepNumber = cardElement.querySelector(`.${styles.stepNumber}`);
-          if (stepNumber) {
-            gsap.fromTo(
-              stepNumber,
-              { rotation: 0 },
-              {
-                rotation: 360,
-                duration: 1.5,
-                ease: "power2.out",
-                delay: 0.3,
-              }
-            );
-          }
-
-          // Animate description items
-          const descItems = cardElement.querySelectorAll(
-            `.${styles.descriptionItem}`
-          );
-          gsap.fromTo(
-            descItems,
-            { opacity: 0, x: -20 },
-            {
-              opacity: 1,
-              x: 0,
-              duration: 0.6,
-              stagger: 0.1,
-              delay: 0.8,
-              ease: "power2.out",
-            }
-          );
-        }
-      });
-
-      // Reset transition state
-      setTimeout(() => setIsTransitioning(false), 1200);
-    },
-    [currentStep, isTransitioning, calculate3DPosition]
-  );
-
-  // Navigation functions
-  const goToNext = useCallback(() => {
-    const nextStep = (currentStep + 1) % ROADMAP_STEPS.length;
-    rotateToStep(nextStep);
-  }, [currentStep, rotateToStep]);
-
-  const goToPrev = useCallback(() => {
-    const prevStep =
-      currentStep === 0 ? ROADMAP_STEPS.length - 1 : currentStep - 1;
-    rotateToStep(prevStep);
-  }, [currentStep, rotateToStep]);
-
-  // Auto-play functionality
-  const startAutoPlay = useCallback(() => {
-    setIsAutoPlaying(true);
-    autoPlayRef.current = setInterval(goToNext, 5000);
-  }, [goToNext]);
-
-  const stopAutoPlay = useCallback(() => {
-    setIsAutoPlaying(false);
-    if (autoPlayRef.current) {
-      clearInterval(autoPlayRef.current);
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
     }
+
+    return () => observer.disconnect();
   }, []);
 
-  const toggleAutoPlay = useCallback(() => {
-    if (isAutoPlaying) {
-      stopAutoPlay();
-    } else {
-      startAutoPlay();
-    }
-  }, [isAutoPlaying, startAutoPlay, stopAutoPlay]);
-
-  // Initialize carousel
+  // Optimized GSAP animations
   useEffect(() => {
-    if (!carouselRef.current) return;
+    if (!timelineRef.current || !isInView) return;
 
-    // GSAP configuration for optimal performance
     gsap.config({
       force3D: true,
       nullTargetWarn: false,
-      trialWarn: false,
     });
 
-    const cards = carouselRef.current.querySelectorAll(
-      `.${styles.carouselCard}`
-    );
+    const cards = timelineRef.current.querySelectorAll(`.${styles.stepCard}`);
 
-    // Position cards initially
     cards.forEach((card, index) => {
       const cardElement = card as HTMLElement;
-      const { x, z, rotateY, state } = calculate3DPosition(
-        index,
-        0,
-        ROADMAP_STEPS.length
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setCurrentStep(index);
+              animateCardEntry(cardElement, index);
+            }
+          });
+        },
+        { threshold: 0.6 }
       );
 
-      // Set initial position and state
-      gsap.set(cardElement, {
-        x: x,
-        z: z,
-        rotateY: rotateY,
-        transformOrigin: "center center",
-        force3D: true,
-      });
-
-      cardElement.classList.add(styles[state]);
+      observer.observe(cardElement);
     });
 
-    // Animate cards in on load
-    gsap.fromTo(
-      cards,
-      { opacity: 0, y: 100 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 1.5,
-        stagger: 0.2,
-        ease: "power3.out",
-        delay: 0.5,
-      }
-    );
-
-    // Keyboard navigation
-    const handleKeyDown = (event: KeyboardEvent) => {
-      switch (event.key) {
-        case "ArrowLeft":
-          event.preventDefault();
-          goToPrev();
-          break;
-        case "ArrowRight":
-          event.preventDefault();
-          goToNext();
-          break;
-        case " ":
-          event.preventDefault();
-          toggleAutoPlay();
-          break;
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    // Auto-start auto-play after a delay
-    const autoStartTimer = setTimeout(() => {
-      startAutoPlay();
-    }, 8000);
-
-    // Cleanup
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      clearTimeout(autoStartTimer);
-      stopAutoPlay();
+      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
     };
-  }, [
-    calculate3DPosition,
-    goToNext,
-    goToPrev,
-    toggleAutoPlay,
-    startAutoPlay,
-    stopAutoPlay,
-  ]);
+  }, [isInView]);
+
+  // Progressive disclosure animation
+  const animateCardEntry = (cardElement: HTMLElement, index: number) => {
+    const isLeft = index % 2 === 0;
+
+    gsap
+      .timeline()
+      .fromTo(
+        cardElement,
+        {
+          opacity: 0,
+          x: isLeft ? -100 : 100,
+          y: 50,
+        },
+        {
+          opacity: 1,
+          x: 0,
+          y: 0,
+          duration: 0.8,
+          ease: "power3.out",
+        }
+      )
+      .fromTo(
+        cardElement.querySelectorAll(".animate-stagger"),
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: "power2.out",
+        },
+        "-=0.4"
+      );
+  };
 
   return (
     <section className={styles.processSection} ref={sectionRef}>
-      {/* Enhanced Header */}
+      {/* Sales-Optimized Header */}
       <div className={styles.processHeader}>
         <div className={styles.headerContent}>
-          <div className={styles.badge}>
-            <span className={styles.badgeIcon}>⚡</span>
-            <span className={styles.badgeText}>Our Process</span>
+          <div className={styles.urgencyBanner}>
+            <span className={styles.urgencyIcon}>⚠️</span>
+            <span className={styles.urgencyText}>
+              LIMITED AVAILABILITY - Only 3 Q1 2025 spots remaining
+            </span>
           </div>
 
-          <h2 className={styles.title}>From Vision to Reality</h2>
+          <div className={styles.badge}>
+            <span className={styles.badgeIcon}>🚀</span>
+            <span className={styles.badgeText}>Proven Process</span>
+          </div>
+
+          <h2 className={styles.title}>
+            From Idea to Market Leader in 120 Days
+          </h2>
 
           <p className={styles.subtitle}>
-            A revolutionary 4-step process that transforms your business idea
-            into a market-dominating AI-powered solution in just 120 days.
+            The only AI-accelerated development process that guarantees 400%
+            ROI. Used by 500+ companies including YC startups and Fortune 500
+            enterprises.
           </p>
 
           <div className={styles.headerStats}>
             <div className={styles.statItem}>
-              <span className={styles.statValue}>120</span>
-              <span className={styles.statLabel}>Days to Launch</span>
+              <span className={styles.statValue}>500+</span>
+              <span className={styles.statLabel}>Successful Launches</span>
             </div>
             <div className={styles.statItem}>
-              <span className={styles.statValue}>500%</span>
-              <span className={styles.statLabel}>Faster Development</span>
+              <span className={styles.statValue}>120</span>
+              <span className={styles.statLabel}>Days to Market</span>
             </div>
             <div className={styles.statItem}>
               <span className={styles.statValue}>400%</span>
-              <span className={styles.statLabel}>ROI Guarantee</span>
+              <span className={styles.statLabel}>Average ROI</span>
+            </div>
+          </div>
+
+          <div className={styles.guaranteeSection}>
+            <div className={styles.guaranteeIcon}>🛡️</div>
+            <div className={styles.guaranteeText}>
+              <strong>100% Success Guarantee:</strong> If you don't achieve 200%
+              ROI in 6 months, we refund everything.
             </div>
           </div>
         </div>
       </div>
 
-      {/* 3D Rotating Gallery */}
-      <div className={styles.galleryContainer}>
-        <div className={styles.carouselWheel} ref={carouselRef}>
-          {ROADMAP_STEPS.map((step, index) => (
-            <div key={step.number} className={styles.carouselCard}>
-              <div className={styles.cardContent}>
-                {/* Card Header */}
-                <div className={styles.cardHeader}>
-                  <div className={styles.stepNumber}>{step.number}</div>
-                  <div className={styles.stepBadge}>{step.timeline}</div>
+      {/* Progressive Timeline */}
+      <div className={styles.timelineContainer} ref={timelineRef}>
+        <div className={styles.timelineConnector}></div>
+
+        {PROCESS_STEPS.map((step, index) => (
+          <div
+            key={step.number}
+            className={`${styles.stepCard} ${index % 2 === 0 ? styles.leftCard : styles.rightCard}`}
+          >
+            <div className={styles.cardContent}>
+              {/* Step Header */}
+              <div className={`${styles.stepHeader} animate-stagger`}>
+                <div className={styles.stepNumber}>
+                  {step.number.toString().padStart(2, "0")}
                 </div>
-
-                {/* Card Body */}
-                <div className={styles.cardBody}>
-                  <h3 className={styles.stepTitle}>{step.title}</h3>
-
-                  <ul className={styles.stepDescription}>
-                    {step.description.map((item, itemIndex) => (
-                      <li key={itemIndex} className={styles.descriptionItem}>
-                        <div className={styles.itemIcon} />
-                        <span className={styles.itemText}>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
+                <div className={styles.stepMeta}>
+                  <div className={styles.stepTimeline}>{step.timeline}</div>
+                  <div className={styles.stepTitle}>{step.title}</div>
                 </div>
+              </div>
 
-                {/* Card Footer */}
-                <div className={styles.cardFooter}>
-                  <div className={styles.salesImpact}>
-                    <div className={styles.impactHeader}>
-                      <span className={styles.impactIcon}>
-                        {step.salesImpact.icon}
-                      </span>
-                      Business Impact
-                    </div>
-                    <p className={styles.impactText}>{step.salesImpact.text}</p>
+              {/* Pain Point */}
+              <div className={`${styles.painPoint} animate-stagger`}>
+                <div className={styles.painIcon}>⚠️</div>
+                <p>{step.painPoint}</p>
+              </div>
+
+              {/* Description */}
+              <ul className={`${styles.stepDescription} animate-stagger`}>
+                {step.description.map((item, itemIndex) => (
+                  <li key={itemIndex} className={styles.descriptionItem}>
+                    <div className={styles.itemIcon} />
+                    <span className={styles.itemText}>{item}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* Sales Impact */}
+              <div className={`${styles.salesImpact} animate-stagger`}>
+                <div className={styles.impactHeader}>
+                  <span className={styles.impactIcon}>
+                    {step.salesImpact.icon}
+                  </span>
+                  <span>Business Impact</span>
+                </div>
+                <p className={styles.impactText}>{step.salesImpact.text}</p>
+                <div className={styles.impactMetric}>
+                  {step.salesImpact.metric}
+                </div>
+              </div>
+
+              {/* Social Proof */}
+              <div className={`${styles.socialProof} animate-stagger`}>
+                <div className={styles.testimonial}>
+                  <p>"{step.social.testimonial}"</p>
+                  <div className={styles.testimonialAuthor}>
+                    <strong>{step.social.author}</strong>
+                    <span>{step.social.company}</span>
                   </div>
-
-                  <div className={styles.visualMetric}>
-                    <span
-                      className={`${styles.metricIcon} ${styles[step.visual.animation]}`}
-                    >
-                      {step.visual.icon}
-                    </span>
-                    <div className={styles.metricValue}>
-                      {step.visual.value}
-                    </div>
-                    <div className={styles.metricLabel}>
-                      {step.visual.label}
-                    </div>
+                  <div className={styles.testimonialResult}>
+                    {step.social.result}
                   </div>
                 </div>
               </div>
+
+              {/* Visual Metric */}
+              <div className={`${styles.visualMetric} animate-stagger`}>
+                <span
+                  className={`${styles.metricIcon} ${styles[step.visual.animation]}`}
+                >
+                  {step.visual.icon}
+                </span>
+                <div className={styles.metricValue}>{step.visual.value}</div>
+                <div className={styles.metricLabel}>{step.visual.label}</div>
+              </div>
+
+              {/* CTA */}
+              <div className={`${styles.stepCta} animate-stagger`}>
+                <button className={styles.ctaButton}>
+                  <span>{step.cta.text}</span>
+                  <span className={styles.ctaIcon}>→</span>
+                </button>
+                <div className={styles.ctaUrgency}>{step.cta.urgency}</div>
+              </div>
             </div>
-          ))}
-        </div>
-
-        {/* Interactive Controls */}
-        <div className={styles.galleryControls}>
-          <button
-            className={`${styles.navArrow} ${currentStep === 0 ? styles.disabled : ""}`}
-            onClick={goToPrev}
-            disabled={isTransitioning}
-            aria-label="Previous step"
-          >
-            ←
-          </button>
-
-          <div className={styles.dotsContainer}>
-            {ROADMAP_STEPS.map((_, index) => (
-              <button
-                key={index}
-                className={`${styles.navDot} ${index === currentStep ? styles.active : ""}`}
-                onClick={() => rotateToStep(index)}
-                disabled={isTransitioning}
-                aria-label={`Go to step ${index + 1}`}
-              />
-            ))}
           </div>
-
-          <button
-            className={`${styles.navArrow} ${currentStep === ROADMAP_STEPS.length - 1 ? styles.disabled : ""}`}
-            onClick={goToNext}
-            disabled={isTransitioning}
-            aria-label="Next step"
-          >
-            →
-          </button>
-
-          <button
-            className={`${styles.autoPlayToggle} ${isAutoPlaying ? styles.active : ""}`}
-            onClick={toggleAutoPlay}
-            aria-label={isAutoPlaying ? "Pause auto-play" : "Start auto-play"}
-          >
-            {isAutoPlaying ? "⏸" : "▶"}
-          </button>
-        </div>
+        ))}
       </div>
 
-      {/* Section Footer with CTA */}
-      <div className={styles.sectionFooter}>
+      {/* Final CTA Section */}
+      <div className={styles.finalCta}>
         <div className={styles.ctaContainer}>
-          <h3 className={styles.ctaTitle}>Ready to Transform Your Business?</h3>
+          <h3 className={styles.ctaTitle}>
+            Ready to Join 500+ Success Stories?
+          </h3>
           <p className={styles.ctaText}>
-            Join 500+ companies that have accelerated their growth with our
-            proven process. Start your transformation today.
+            Don't let competitors beat you to market. Secure your Q1 2025 spot
+            and get:
           </p>
-          <a href="#contact" className={styles.ctaButton}>
-            <span className={styles.buttonText}>Start Your Project</span>
-            <span className={styles.buttonIcon}>→</span>
-          </a>
+
+          <div className={styles.ctaBenefits}>
+            <div className={styles.benefit}>✅ $15K early bird discount</div>
+            <div className={styles.benefit}>✅ 100% success guarantee</div>
+            <div className={styles.benefit}>✅ Dedicated success manager</div>
+          </div>
+
+          <div className={styles.ctaActions}>
+            <button className={styles.primaryCta}>
+              <span>Reserve Your Q1 Spot</span>
+              <span className={styles.ctaIcon}>🚀</span>
+            </button>
+            <div className={styles.riskReversal}>
+              100% Money-Back Guarantee • No Risk • Cancel Anytime
+            </div>
+          </div>
+
+          <div className={styles.urgencyFinal}>
+            <span className={styles.urgencyIcon}>🔥</span>
+            <span>Only 3 spots remaining for Q1 2025 cohort</span>
+          </div>
         </div>
       </div>
     </section>
