@@ -36,71 +36,40 @@ export default function Navbar() {
       </div>
 
       <motion.div
+        layout
         className={cn(
-          "mx-auto max-w-6xl transition-all duration-300 ease-in-out border border-white/10 floating-navbar",
+          "mx-auto transition-all duration-[800ms] ease-in-out floating-navbar",
           scrolled
-            ? "backdrop-blur-xl bg-black/70 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
-            : "backdrop-blur-md bg-black/30 shadow-[0_8px_32px_rgba(0,0,0,0.2)]",
-          "rounded-full overflow-hidden"
+            ? "max-w-5xl backdrop-blur-xl bg-black/80 shadow-[0_8px_32px_rgba(0,0,0,0.6)] border border-white/10 rounded-full py-1"
+            : "max-w-7xl backdrop-blur-sm bg-black/10 border border-transparent rounded-[2rem] py-4"
         )}
-        initial={{ y: -20, opacity: 0 }}
+        initial={{ y: -40, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
+        transition={{ duration: 0.8, type: "spring", stiffness: 60, damping: 20 }}
       >
         <nav
-          className="flex items-center justify-between px-4 sm:px-8 py-3 sm:py-4"
+          className={cn("flex items-center justify-between px-4 sm:px-8 transition-all duration-[800ms] ease-in-out", scrolled ? "py-1" : "py-3 sm:py-4")}
           aria-label="Global"
         >
           <div className="flex lg:flex-1">
             <Link
               href="/"
-              className="flex items-center gap-3"
+              className="flex items-center"
               aria-label="NEBULOS"
             >
               <motion.div
-                className="relative w-9 h-9 flex items-center justify-center"
-                initial={{ opacity: 0, scale: 0.8 }}
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{
-                  duration: 0.5,
-                  type: "spring",
-                  stiffness: 100,
-                }}
-                whileHover={{ scale: 1.1 }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-[#9900ff] via-[#ff00ff] to-[#00eeff] rounded-full opacity-70 blur-[2px]" />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#9900ff] via-[#ff00ff] to-[#00eeff] rounded-full opacity-100" />
-                <div className="absolute inset-0 bg-black/50 rounded-full m-1.5" />
-                <span className="relative z-10 text-white font-bold text-lg">
-                  N
-                </span>
-
-                {/* Animated glow effect - reduced blur and opacity */}
-                <motion.div
-                  className="absolute -inset-1 bg-gradient-to-r from-[#9900ff]/30 via-[#ff00ff]/30 to-[#00eeff]/30 rounded-full blur-sm"
-                  animate={{
-                    opacity: [0.3, 0.5, 0.3],
-                    scale: [1, 1.05, 1],
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    repeatType: "reverse",
-                  }}
-                />
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2, duration: 0.5 }}
+                transition={{ delay: 0.1, duration: 0.6, type: "spring" }}
+                whileHover={{ scale: 1.05 }}
               >
                 <Image
                   src="/images/nebulos_logo.svg"
                   alt="NEBULOS"
-                  width={120}
-                  height={28}
-                  className="h-7 w-auto"
+                  width={330}
+                  height={75}
+                  className={cn("w-auto hover:brightness-125 transition-all duration-[800ms] ease-in-out drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]", scrolled ? "h-[52px]" : "h-[66px]")}
                   priority
                 />
               </motion.div>

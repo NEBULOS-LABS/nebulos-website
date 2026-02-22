@@ -17,7 +17,7 @@ const LampContainer = ({
   return (
     <div
       className={cn(
-        "relative flex flex-col items-center justify-center overflow-hidden bg-black w-full rounded-md z-0",
+        "relative flex flex-col items-center justify-center overflow-hidden bg-transparent w-full rounded-md z-0",
         className
       )}
     >
@@ -35,8 +35,8 @@ const LampContainer = ({
           }}
           className="absolute inset-auto right-1/2 h-56 overflow-visible w-[30rem] bg-gradient-conic from-cyan-500 via-transparent to-transparent text-white [--conic-position:from_70deg_at_center_top]"
         >
-          <div className="absolute  w-[100%] left-0 bg-black h-40 bottom-0 z-20 [mask-image:linear-gradient(to_top,white,transparent)]" />
-          <div className="absolute  w-40 h-[100%] left-0 bg-black  bottom-0 z-20 [mask-image:linear-gradient(to_right,white,transparent)]" />
+          <div className="absolute w-[100%] left-0 bg-black/50 backdrop-blur-md h-40 bottom-0 z-20 [mask-image:linear-gradient(to_top,white,transparent)]" />
+          <div className="absolute w-40 h-[100%] left-0 bg-black/50 backdrop-blur-md bottom-0 z-20 [mask-image:linear-gradient(to_right,white,transparent)]" />
         </motion.div>
         <motion.div
           initial={{ opacity: 0.5, width: "15rem" }}
@@ -51,10 +51,10 @@ const LampContainer = ({
           }}
           className="absolute inset-auto left-1/2 h-56 w-[30rem] bg-gradient-conic from-transparent via-transparent to-cyan-500 text-white [--conic-position:from_290deg_at_center_top]"
         >
-          <div className="absolute  w-40 h-[100%] right-0 bg-black  bottom-0 z-20 [mask-image:linear-gradient(to_left,white,transparent)]" />
-          <div className="absolute  w-[100%] right-0 bg-black h-40 bottom-0 z-20 [mask-image:linear-gradient(to_top,white,transparent)]" />
+          <div className="absolute w-40 h-[100%] right-0 bg-black/50 backdrop-blur-md bottom-0 z-20 [mask-image:linear-gradient(to_left,white,transparent)]" />
+          <div className="absolute w-[100%] right-0 bg-black/50 backdrop-blur-md h-40 bottom-0 z-20 [mask-image:linear-gradient(to_top,white,transparent)]" />
         </motion.div>
-        <div className="absolute top-1/2 h-48 w-full translate-y-12 scale-x-150 bg-black blur-2xl"></div>
+        <div className="absolute top-1/2 h-48 w-full translate-y-12 scale-x-150 bg-black/50 blur-2xl"></div>
         <div className="absolute top-1/2 z-50 h-48 w-full bg-transparent opacity-10 backdrop-blur-md"></div>
         <div className="absolute inset-auto z-50 h-36 w-[28rem] -translate-y-1/2 rounded-full bg-cyan-500 opacity-50 blur-3xl"></div>
         <motion.div
@@ -78,7 +78,7 @@ const LampContainer = ({
           className="absolute inset-auto z-50 h-0.5 w-[30rem] -translate-y-[7rem] bg-cyan-400 "
         ></motion.div>
 
-        <div className="absolute inset-auto z-40 h-44 w-full -translate-y-[12.5rem] bg-black "></div>
+        <div className="absolute inset-auto z-40 h-44 w-full -translate-y-[12.5rem] bg-transparent"></div>
       </div>
 
       <div className="relative z-50 flex -translate-y-40 flex-col items-center px-5">
@@ -92,7 +92,7 @@ export default function Problem() {
   return (
     <section
       id="problem"
-      className="relative bg-black overflow-hidden py-20 lg:py-28"
+      className="relative bg-transparent overflow-hidden py-20 lg:py-28"
     >
       {/* Design elements */}
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
@@ -149,7 +149,7 @@ export default function Problem() {
             <motion.div
               key={index}
               variants={fadeIn("up", index * 0.1)}
-              className="flex flex-col h-full problem-card group"
+              className="flex flex-col h-full bg-black/20 backdrop-blur-2xl border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] rounded-2xl p-6 group hover:bg-black/40 hover:border-[#00eeff]/50 transition-all duration-300"
             >
               <div className="relative h-48 mb-6 overflow-hidden rounded-xl">
                 <Image
@@ -176,8 +176,7 @@ export default function Problem() {
           variants={fadeIn("up")}
           initial="hidden"
           whileInView="show"
-          viewport={{ once: true, amount: 0.25 }}
-          className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10"
+          className="bg-black/40 backdrop-blur-[20px] rounded-3xl p-8 lg:p-12 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div>
@@ -195,8 +194,8 @@ export default function Problem() {
               <div className="h-1 w-20 bg-gradient-to-r from-[#9900ff] to-[#00eeff] rounded-full mt-4" />
             </div>
             <div className="relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-[#9900ff] to-[#00eeff] opacity-30 blur-sm rounded-lg" />
-              <div className="relative bg-black/80 rounded-lg p-6">
+              <div className="absolute -inset-1 bg-gradient-to-r from-[#9900ff] to-[#00eeff] opacity-40 blur-lg rounded-xl" />
+              <div className="relative bg-black/60 backdrop-blur-2xl border border-white/10 rounded-xl p-6 lg:p-8">
                 <div className="flex flex-col space-y-4">
                   <div className="flex items-center justify-between border-b border-white/10 pb-2">
                     <span className="text-gray-400">Average feature delay</span>
