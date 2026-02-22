@@ -22,19 +22,6 @@ export default function Navbar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 w-full px-4 sm:px-6 md:px-8 pt-6">
-      {/* Modified container for the half-circle decorative elements */}
-      <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 w-full max-w-5xl select-none">
-        {/* More subtle left decorative accent */}
-        <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-5 h-12 opacity-30 hidden md:block">
-          <div className="w-full h-full rounded-l-full bg-[#9900ff]/25 backdrop-blur-sm" />
-        </div>
-
-        {/* More subtle right decorative accent */}
-        <div className="absolute -right-1 top-1/2 -translate-y-1/2 w-5 h-12 opacity-30 hidden md:block">
-          <div className="w-full h-full rounded-r-full bg-[#00eeff]/25 backdrop-blur-sm" />
-        </div>
-      </div>
-
       <motion.div
         layout
         className={cn(

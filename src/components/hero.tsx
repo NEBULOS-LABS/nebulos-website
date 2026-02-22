@@ -2,30 +2,43 @@
 
 import React, { useEffect, useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { fadeIn, staggerContainer } from "@/lib/animations";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useGSAP(() => {
+    // Hero entry stagger animation
+    gsap.fromTo(".hero-anim", 
+      { y: 20, opacity: 0 },
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.8,
+        ease: "power2.out",
+        stagger: 0.1,
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top 75%",
+          toggleActions: "play none none none"
+        }
+      }
+    );
+  }, { scope: containerRef });
 
   // No internal stickiness or useScroll needed because it flows naturally over the global video background!
   
   return (
-    <div className="relative min-h-[90vh] bg-transparent flex flex-col items-center justify-center pt-32 pb-20">
+    <div ref={containerRef} className="relative min-h-[90vh] bg-transparent flex flex-col items-center justify-center pt-32 pb-20">
       <div className="relative z-10 mx-auto w-full px-4 sm:px-6 lg:px-8 mt-10">
-          <motion.div
-            variants={staggerContainer(0.1)}
-            initial="hidden"
-            animate="show"
-            viewport={{ once: true, amount: 0.25 }}
-            className="mx-auto max-w-[1400px] text-center flex flex-col items-center"
-          >
-            <motion.h1
-              variants={fadeIn("up")}
-              className="font-black tracking-tighter text-white uppercase leading-[0.85] text-6xl sm:text-8xl md:text-[9rem] lg:text-[10rem] drop-shadow-2xl"
-              style={{ textShadow: "0 20px 60px rgba(0,0,0,0.8)" }}
+          <div className="mx-auto max-w-[1400px] text-center flex flex-col items-center">
+            <h1
+              className="hero-anim opacity-0 font-black tracking-tighter text-white uppercase leading-[0.85] text-6xl sm:text-8xl md:text-[9rem] lg:text-[10rem] drop-shadow-2xl"
+              style={{ textShadow: "0 20px 60px rgba(0,0,0,0.8)", transform: "translateY(20px)" }}
             >
               Ship <span className="relative inline-block italic pr-2">
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/40">Faster.</span>
@@ -40,28 +53,28 @@ export default function Hero() {
                   <path d="M 10 90 L 90 10 M 30 90 L 100 20 M 60 90 L 110 40" className="animate-pulse" style={{ transformOrigin: 'center', transform: 'rotate(15deg) scaleX(1.2)' }} />
                 </svg>
               </span>
-            </motion.h1>
+            </h1>
             
-            <motion.h2
-              variants={fadeIn("up", 0.1)}
-              className="mt-6 font-bold tracking-tight text-white/90 text-2xl sm:text-4xl md:text-5xl lg:text-6xl drop-shadow-xl"
+            <h2
+              className="hero-anim opacity-0 mt-6 font-bold tracking-tight text-white/90 text-2xl sm:text-4xl md:text-5xl lg:text-6xl drop-shadow-xl"
+              style={{ transform: "translateY(20px)" }}
             >
               World-class software in <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00FFFF] to-[#00EEFF] italic drop-shadow-[0_0_20px_rgba(0,255,255,0.7)]">weeks, not quarters.</span>
-            </motion.h2>
+            </h2>
 
-          <motion.p
-            variants={fadeIn("up", 0.2)}
-            className="mt-10 text-lg sm:text-xl leading-8 text-gray-300 max-w-2xl mx-auto font-medium"
+          <p
+            className="hero-anim opacity-0 mt-10 text-lg sm:text-xl leading-8 text-gray-300 max-w-2xl mx-auto font-medium"
+            style={{ transform: "translateY(20px)" }}
           >
             We design, build, and scale revenue‑driving products—websites, SaaS
             platforms, mobile apps, and complex engineering systems—using elite
             talent, AI‑accelerated workflows, and a guarantee that puts all the
             risk on us.
-          </motion.p>
+          </p>
 
-          <motion.div
-            variants={fadeIn("up", 0.3)}
-            className="mt-16 flex items-center justify-center"
+          <div
+            className="hero-anim opacity-0 mt-16 flex items-center justify-center"
+            style={{ transform: "translateY(20px)" }}
           >
             <Link href="#contact" className="group flex flex-col items-center gap-2 relative">
               <div className="relative flex items-center justify-center p-4">
@@ -81,9 +94,9 @@ export default function Hero() {
                 Start Your Project
               </span>
             </Link>
-          </motion.div>
+          </div>
 
-          </motion.div>
+          </div>
         </div>
     </div>
   );

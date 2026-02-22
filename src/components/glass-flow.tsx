@@ -1,31 +1,56 @@
 "use client";
 
 import React, { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { fadeIn, staggerContainer } from "@/lib/animations";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
 
+gsap.registerPlugin(ScrollTrigger);
+
 export default function GlassFlow() {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
 
-  // Track the component's scroll position
-  // "start bottom" = 0 (when top of this section hits the bottom of the viewport)
-  // "start top" = 1 (when top of this section hits the top of the viewport)
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start 100%", "start 0%"],
-  });
+  useGSAP(() => {
+    // Animate width from 90% when peeking, to 100% when it hits the top
+    // Animate border radius from 40px (rounded card) to 0px (flat edges)
+    gsap.fromTo(cardRef.current,
+      { width: "90%", borderRadius: "40px" },
+      {
+        width: "100%",
+        borderRadius: "0px",
+        ease: "none",
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top bottom",
+          end: "top top",
+          scrub: true,
+        }
+      }
+    );
 
-  // Animate width from 90% when peeking, to 100% when it hits the top
-  const widthStr = useTransform(scrollYProgress, [0, 1], ["90%", "100%"]);
-  
-  // Animate border radius from 40px (rounded card) to 0px (flat edges)
-  const borderStr = useTransform(scrollYProgress, [0, 1], ["40px", "0px"]);
+    gsap.fromTo(".glass-anim",
+      { y: 20, opacity: 0 },
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.8,
+        ease: "power2.out",
+        stagger: 0.1,
+        scrollTrigger: {
+          trigger: cardRef.current,
+          start: "top 80%",
+          toggleActions: "play none none none"
+        }
+      }
+    );
+  }, { scope: containerRef });
 
   return (
     <section ref={containerRef} className="relative w-full z-20 pb-32 flex flex-col items-center">
-      <motion.div
-        style={{ width: widthStr, borderRadius: borderStr }}
+      <div
+        ref={cardRef}
         className="mx-auto bg-black/40 backdrop-blur-[24px] border border-white/10 shadow-[0_-20px_80px_rgba(0,0,0,0.6)] overflow-hidden relative"
       >
         {/* Internal ambient glowing effects */}
@@ -34,20 +59,16 @@ export default function GlassFlow() {
 
         <div className="relative z-10 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
           
-          <motion.div
-            variants={staggerContainer()}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.2 }}
+          <div
             className="flex flex-col items-center space-y-16"
           >
             {/* Header */}
-            <motion.h2 variants={fadeIn("up")} className="text-4xl sm:text-5xl lg:text-7xl font-bold text-center tracking-tight text-white mb-4 leading-[1.1]">
+            <h2 className="glass-anim opacity-0 text-4xl sm:text-5xl lg:text-7xl font-bold text-center tracking-tight text-white mb-4 leading-[1.1]" style={{ transform: "translateY(20px)" }}>
               Your growth is bottlenecked by code <br/>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00ffff] to-[#ff00ff] italic">
                 you don't have time to write.
               </span>
-            </motion.h2>
+            </h2>
 
             {/* Grid of issues */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full mt-10">
@@ -71,10 +92,10 @@ export default function GlassFlow() {
                   image: "/images/open_box_image.png",
                 },
               ].map((item, index) => (
-                <motion.div
+                <div
                   key={index}
-                  variants={fadeIn("up", index * 0.1)}
-                  className="flex flex-col h-full bg-white/5 backdrop-blur-3xl border border-white/10 rounded-3xl p-6 group hover:bg-white/10 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.3)] relative overflow-hidden"
+                  className="glass-anim opacity-0 flex flex-col h-full bg-white/5 backdrop-blur-3xl border border-white/10 rounded-3xl p-6 group hover:bg-white/10 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.3)] relative overflow-hidden"
+                  style={{ transform: "translateY(20px)" }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-tr from-[#9900ff]/5 to-[#00eeff]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <div className="relative h-48 mb-6 overflow-hidden rounded-2xl border border-white/5">
@@ -93,14 +114,14 @@ export default function GlassFlow() {
                     {item.title}
                   </h3>
                   <p className="text-gray-400 relative z-10 leading-relaxed">{item.description}</p>
-                </motion.div>
+                </div>
               ))}
             </div>
 
             {/* Hidden Cost */}
-            <motion.div
-              variants={fadeIn("up", 0.3)}
-              className="w-full bg-black/40 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-10 lg:p-16 relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+            <div
+              className="glass-anim opacity-0 w-full bg-black/40 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-10 lg:p-16 relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+              style={{ transform: "translateY(20px)" }}
             >
               <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#ff00ff]/20 blur-[120px] rounded-full pointer-events-none" />
               <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-[#00eeff]/20 blur-[120px] rounded-full pointer-events-none" />
@@ -143,10 +164,10 @@ export default function GlassFlow() {
                   </div>
                 </div>
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }
