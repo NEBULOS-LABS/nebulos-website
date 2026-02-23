@@ -25,8 +25,8 @@ export default function Home() {
     offset: ["start start", "end end"],
   });
 
-  // Opacity transitions: 0.8 during hero, drops to 0.70 for clients/problem, fades to 0 at the end
-  const videoOpacity = useTransform(scrollYProgress, [0, 0.4, 0.9, 1], [0.8, 0.70, 0.70, 0]);
+  // Opacity transitions: 0.8 during hero, drops for problem section, fully gone before card rotation
+  const videoOpacity = useTransform(scrollYProgress, [0, 0.4, 0.65, 0.85], [0.8, 0.70, 0.30, 0]);
 
   useEffect(() => {
     if (videoRef.current) {

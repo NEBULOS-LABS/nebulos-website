@@ -13,10 +13,10 @@ export default function KprTransition() {
   const containerRef = useRef<HTMLDivElement>(null);
   const card1Ref = useRef<HTMLDivElement>(null);
   const card2Ref = useRef<HTMLDivElement>(null);
-  const cover1Ref = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
-    // Card 1 enters from 0.9 width and rough corners, then expands to 1.0 and sharp corners
+    // ── Card 1 Entry ──
+    // Scales up from 0.9 to 1.0 and corners sharpen as the section scrolls into view.
     gsap.fromTo(card1Ref.current,
       { scale: 0.9, borderRadius: "48px" },
       {
@@ -24,44 +24,46 @@ export default function KprTransition() {
         borderRadius: "0px",
         scrollTrigger: {
           trigger: containerRef.current,
-          start: "top bottom",
-          end: "top top",
+          start: "top-=80 bottom",
+          end: "top 15%",
           scrub: true,
         }
       }
     );
 
-    // The KPR-Verse Stacked scroll gap logic:
-    // Card 1 shrinks back down, corners round off, and rotates to create the carousel inflection angle
-    gsap.to(card1Ref.current, {
+    // ── Card 1 Exit (Timeline) ──
+    // A single timeline with two phases avoids conflicting tweens on the same properties.
+    // Phase 1 (first 60% of scroll): gentle ramp into the rotation starting angle.
+    // Phase 2 (last 40% of scroll): accelerates into the full carousel rotation.
+    const exitTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: card1Ref.current,
+        start: "85% bottom",
+        end: "bottom top",
+        scrub: true,
+      }
+    });
+
+    exitTl.to(card1Ref.current, {
+      scale: 0.96,
+      borderRadius: "20px",
+      rotateX: -1,
+      transformPerspective: 1000,
+      y: -15,
+      duration: 0.6,
+    });
+
+    exitTl.to(card1Ref.current, {
       scale: 0.88,
       borderRadius: "48px",
       rotateX: -4,
       transformPerspective: 1000,
       y: -50,
-      scrollTrigger: {
-        trigger: card1Ref.current,
-        start: "bottom bottom", 
-        end: "bottom top", 
-        scrub: true,
-      }
+      duration: 0.4,
     });
 
-    // Fade in a solid black backdrop exactly behind Card 1 to hide peaking background videos
-    gsap.fromTo(cover1Ref.current,
-      { opacity: 0 },
-      {
-        opacity: 1,
-        scrollTrigger: {
-          trigger: card1Ref.current,
-          start: "bottom bottom",
-          end: "bottom 50%", // aggressively hide the background early
-          scrub: true,
-        }
-      }
-    );
-
-    // Card 2 enters from bottom, scaled down, then grows to fill the horizontal bounds
+    // ── Card 2 Entry ──
+    // Solution section scales up and flattens as it scrolls into view.
     gsap.fromTo(card2Ref.current,
       { scale: 0.88, borderRadius: "48px", rotateX: 2, transformPerspective: 1000 },
       {
@@ -84,14 +86,10 @@ export default function KprTransition() {
       ref={containerRef}
       className="relative w-full z-10"
     >
-      {/* Card 1: Problem Section with Cover for Peaking */}
-      <div className="relative w-full z-10">
-        <div 
-          ref={cover1Ref} 
-          className="absolute inset-0 bg-black pointer-events-none z-0" 
-        />
-        <div 
-          className="relative w-full overflow-hidden origin-bottom shadow-[0_20px_50px_rgba(0,0,0,0.5)] transform-gpu z-10" 
+      {/* Card 1: Problem Section */}
+      <div className="relative w-full z-10 -mt-16 -mb-28">
+        <div
+          className="relative w-full overflow-hidden origin-bottom bg-black/90 backdrop-blur-xl border border-white/[0.06] shadow-[0_20px_50px_rgba(0,0,0,0.5),0_0_80px_rgba(0,238,255,0.04),0_0_80px_rgba(153,0,255,0.04)] transform-gpu z-10"
           ref={card1Ref}
         >
           <GlassFlow />
@@ -117,11 +115,13 @@ export default function KprTransition() {
       </div>
 
       {/* Card 2: Solution Section */}
-      <div
-        className="relative w-full overflow-hidden origin-bottom -mt-40 bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] border-t-[#00eeff]/25 shadow-[0_-20px_60px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.05)] transform-gpu z-10"
-        ref={card2Ref}
-      >
-        <Solution />
+      <div className="relative w-full z-10 -mt-40">
+        <div
+          className="relative w-full overflow-hidden origin-top bg-black/90 backdrop-blur-xl border border-white/[0.06] shadow-[0_-20px_50px_rgba(0,0,0,0.5),0_0_80px_rgba(0,238,255,0.04),0_0_80px_rgba(153,0,255,0.04)] transform-gpu z-10"
+          ref={card2Ref}
+        >
+          <Solution />
+        </div>
       </div>
 
     </div>
