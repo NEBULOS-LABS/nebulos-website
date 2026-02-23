@@ -1,10 +1,11 @@
-"use client";
+﻿"use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Navbar from "@/components/navbar";
 import Hero from "@/components/hero";
-import KprTransition from "@/components/kpr-transition";
+import GlassFlow from "@/components/glass-flow";
+import Solution from "@/components/solution";
 import Testimonials from "@/components/testimonials";
 import Process from "@/components/process";
 import Services from "@/components/services";
@@ -17,7 +18,6 @@ import Bento3Section from "@/components/ui/bento-monochrome-1";
 export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoHeight, setVideoHeight] = useState("100vh");
 
   // Track scroll over the combined hero + clients + problem container
   const { scrollYProgress } = useScroll({
@@ -32,43 +32,17 @@ export default function Home() {
     if (videoRef.current) {
       videoRef.current.playbackRate = 0.5;
     }
-
-    const updateHeight = () => {
-      const marker = document.getElementById("end-of-problem-marker");
-      if (marker && containerRef.current) {
-        // Calculate dynamic scroll boundary to precisely match the bottom of the Problem Section
-        const containerRect = containerRef.current.getBoundingClientRect();
-        const markerRect = marker.getBoundingClientRect();
-        setVideoHeight(`${markerRect.top - containerRect.top}px`);
-      }
-    };
-
-    updateHeight();
-    
-    // Observer for layout shifts when images load or components mount
-    const observer = new ResizeObserver(() => updateHeight());
-    if (containerRef.current) observer.observe(containerRef.current);
-    window.addEventListener('resize', updateHeight);
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('resize', updateHeight);
-    };
   }, []);
 
   return (
-    <main className="bg-black text-white">
+    <main className="overflow-hidden bg-black text-white">
       <Navbar />
 
       <div ref={containerRef} className="relative w-full">
-        {/* Global Video Background - Now bound precisely to hit the boundary of the Problem Section */}
-        <div 
-          className="absolute top-0 left-0 w-full z-0 pointer-events-none"
-          style={{ height: videoHeight }}
-        >
-          <div className="sticky top-0 left-0 w-full h-screen overflow-hidden">
-            <motion.div 
-              className="absolute inset-0 bg-black"
+        {/* Global Fixed Video Background */}
+        <div className="fixed top-0 left-0 w-full h-screen overflow-hidden z-0 pointer-events-none">
+          <motion.div 
+            className="absolute inset-0 bg-black"
             style={{ opacity: videoOpacity }}
           >
             <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f]/40 via-transparent to-transparent z-10" />
@@ -82,7 +56,6 @@ export default function Home() {
               className="w-full h-full object-cover opacity-80"
             />
           </motion.div>
-          </div>
         </div>
 
         {/* Overlapping Content Container */}
@@ -90,10 +63,12 @@ export default function Home() {
           {/* Hero Section */}
           <Hero />
 
-          {/* KPR-Verse Transition replacing sequential GlassFlow and Solution */}
-          <KprTransition />
+          <GlassFlow />
         </div>
       </div>
+
+      {/* Solution Section */}
+      <Solution />
 
       {/* Social Proof Section */}
       <Testimonials />

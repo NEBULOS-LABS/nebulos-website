@@ -1,0 +1,43 @@
+﻿npm : '\\wsl.localhost\Ubu
+ntu\home\asaadabbas\Projec
+ts\nebulos-website'
+At line:1 char:1
++ npm run build 2>&1 | 
+Out-File -Encoding utf8 
+build.log
++ ~~~~~~~~~~~~~~~~~~
+    + CategoryInfo        
+      : NotSpecified: ('  
+  \\wsl.localhos...ebul   
+ os-website':String) [    
+], RemoteException
+    + FullyQualifiedError 
+   Id : NativeCommandErr  
+  or
+ 
+CMD.EXE was started with 
+the above path as the 
+current directory.
+UNC paths are not 
+supported.  Defaulting to 
+Windows directory.
+npm error code ENOENT
+npm error syscall open
+npm error path 
+C:\Windows\package.json
+npm error errno -4058
+npm error enoent Could 
+not read package.json: 
+Error: ENOENT: no such 
+file or directory, open 
+'C:\Windows\package.json'
+npm error enoent This is 
+related to npm not being 
+able to find a file.
+npm error enoent
+npm error A complete log 
+of this run can be found 
+in: C:\Users\16476\AppData
+\Local\npm-cache\_logs\202
+6-02-23T04_37_17_523Z-debu
+g-0.log

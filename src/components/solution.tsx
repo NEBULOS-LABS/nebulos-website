@@ -9,7 +9,7 @@ export default function Solution() {
   return (
     <section
       id="solution"
-      className="relative bg-black overflow-hidden py-20 lg:py-28"
+      className="relative bg-black/40 backdrop-blur-[24px] overflow-hidden py-20 lg:py-28"
     >
       {/* Design elements */}
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />

@@ -13,23 +13,6 @@ export default function GlassFlow() {
   const cardRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
-    // Animate width from 90% when peeking, to 100% when it hits the top
-    // Animate border radius from 40px (rounded card) to 0px (flat edges)
-    gsap.fromTo(cardRef.current,
-      { width: "90%", borderRadius: "40px" },
-      {
-        width: "100%",
-        borderRadius: "0px",
-        ease: "none",
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top bottom",
-          end: "top top",
-          scrub: true,
-        }
-      }
-    );
-
     gsap.fromTo(".glass-anim",
       { y: 20, opacity: 0 },
       {
@@ -48,10 +31,10 @@ export default function GlassFlow() {
   }, { scope: containerRef });
 
   return (
-    <section ref={containerRef} className="relative w-full z-20 pb-32 flex flex-col items-center">
+    <section ref={containerRef} className="relative w-full z-20 flex flex-col items-center">
       <div
         ref={cardRef}
-        className="mx-auto bg-black/40 backdrop-blur-[24px] border border-white/10 shadow-[0_-20px_80px_rgba(0,0,0,0.6)] overflow-hidden relative"
+        className="w-full bg-black/40 backdrop-blur-[24px] overflow-hidden relative"
       >
         {/* Internal ambient glowing effects */}
         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
