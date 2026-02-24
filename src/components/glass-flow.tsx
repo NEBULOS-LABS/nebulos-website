@@ -34,14 +34,14 @@ export default function GlassFlow() {
     <section ref={containerRef} className="relative w-full z-20 flex flex-col items-center">
       <div
         ref={cardRef}
-        className="w-full bg-black/40 backdrop-blur-[24px] overflow-hidden relative"
+        className="w-full bg-gradient-to-b from-white/[0.05] from-0% via-black/50 via-[50%] to-black to-[75%] backdrop-blur-[24px] border-t border-white/10 overflow-hidden relative"
       >
         {/* Ambient edge glow — sides and bottom only, top edge excluded */}
         <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-white/[0.04] to-transparent pointer-events-none" />
         <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-white/[0.04] to-transparent pointer-events-none" />
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white/[0.04] to-transparent pointer-events-none" />
 
-        <div className="relative z-10 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
+        <div className="relative z-10 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-32 sm:pt-48 pb-64 sm:pb-80">
           
           <div
             className="flex flex-col items-center space-y-16"

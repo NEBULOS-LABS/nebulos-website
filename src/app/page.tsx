@@ -25,8 +25,8 @@ export default function Home() {
     offset: ["start start", "end end"],
   });
 
-  // Opacity transitions: 0.8 during hero, drops for problem section, fully gone before card rotation
-  const videoOpacity = useTransform(scrollYProgress, [0, 0.4, 0.65, 0.85], [0.8, 0.70, 0.30, 0]);
+  // Opacity transitions: perfectly visible during hero and problem sections, explicitly fades to 0 in the last 25% of the problem section scroll.
+  const videoOpacity = useTransform(scrollYProgress, [0, 0.3, 0.75, 0.9], [0.8, 0.8, 0.8, 0]);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -57,7 +57,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="bg-black text-white overflow-x-hidden">
+    <main className="bg-black text-white">
       <Navbar />
 
       <div ref={containerRef} className="relative w-full">

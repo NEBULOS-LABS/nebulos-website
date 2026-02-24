@@ -32,7 +32,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} overflow-x-hidden`}>
-      <body className="bg-black min-h-screen text-white antialiased bg-mesh-gradient overflow-x-hidden">
+      <body className="bg-black min-h-screen text-white antialiased bg-mesh-gradient overflow-x-clip">
         {children}
       </body>
     </html>

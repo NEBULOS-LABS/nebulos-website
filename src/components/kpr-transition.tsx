@@ -134,7 +134,7 @@ export default function KprTransition() {
       {/* Card 1: Problem Section */}
       <div ref={card1WrapperRef} className="relative w-full z-10 -mt-16 -mb-40">
         <div
-          className="relative w-full overflow-hidden origin-bottom bg-black/90 backdrop-blur-xl border-x border-b border-white/[0.1] shadow-[0_20px_50px_rgba(0,0,0,0.5),0_30px_60px_-15px_rgba(0,238,255,0.08),0_30px_60px_-15px_rgba(153,0,255,0.08),20px_0_40px_-12px_rgba(255,255,255,0.04),-20px_0_40px_-12px_rgba(255,255,255,0.04),0_4px_20px_-4px_rgba(255,255,255,0.12)] z-10"
+          className="relative w-full overflow-hidden origin-bottom border-x border-b border-white/[0.1] shadow-[0_20px_50px_rgba(0,0,0,0.5),0_30px_60px_-15px_rgba(0,238,255,0.08),0_30px_60px_-15px_rgba(153,0,255,0.08),20px_0_40px_-12px_rgba(255,255,255,0.04),-20px_0_40px_-12px_rgba(255,255,255,0.04),0_4px_20px_-4px_rgba(255,255,255,0.12)] z-10"
           ref={card1Ref}
           style={{ transform: "scale(0.9)", borderRadius: "64px" }}
         >
@@ -142,10 +142,10 @@ export default function KprTransition() {
         </div>
       </div>
 
-      <div id="end-of-problem-marker" className="absolute w-full h-px opacity-0 pointer-events-none" />
+      <div id="end-of-problem-marker" className="w-full h-px opacity-0 pointer-events-none relative z-0" />
 
       {/* The Cinematic Video Gap */}
-      <div className="relative w-full aspect-[21/9] md:aspect-video max-h-[80vh] flex flex-col items-center justify-center overflow-hidden bg-black z-0 pointer-events-none">
+      <div className="relative isolate w-full aspect-[21/9] md:aspect-video max-h-[80vh] flex flex-col items-center justify-center overflow-hidden bg-black z-0 pointer-events-none">
         <video
           src="/images/nebula_cloud_V2.mp4"
           autoPlay
@@ -163,7 +163,7 @@ export default function KprTransition() {
       {/* Card 2: Solution Section */}
       <div ref={card2WrapperRef} className="relative w-full z-10 -mt-40">
         <div
-          className="relative w-full overflow-hidden origin-top bg-black/90 backdrop-blur-xl border-x border-t border-white/[0.1] border-t-white/[0.15] shadow-[0_-20px_50px_rgba(0,0,0,0.5),0_0_60px_rgba(0,238,255,0.06),0_0_60px_rgba(153,0,255,0.06),20px_0_40px_-12px_rgba(255,255,255,0.04),-20px_0_40px_-12px_rgba(255,255,255,0.04),0_-4px_20px_-4px_rgba(255,255,255,0.12)] z-10"
+          className="relative w-full overflow-hidden origin-top border-x border-t border-white/[0.1] border-t-white/[0.15] shadow-[0_-20px_50px_rgba(0,0,0,0.5),0_0_60px_rgba(0,238,255,0.06),0_0_60px_rgba(153,0,255,0.06),20px_0_40px_-12px_rgba(255,255,255,0.04),-20px_0_40px_-12px_rgba(255,255,255,0.04),0_-4px_20px_-4px_rgba(255,255,255,0.12)] z-10"
           ref={card2Ref}
         >
           <Solution />
