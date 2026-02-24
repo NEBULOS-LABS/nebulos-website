@@ -26,15 +26,13 @@ export default function KprTransition() {
 
     // ── CARD 1 (Problem) ─────────────────────────────────────────────
 
-    // Entry: scale up and soften corners as section scrolls into view.
-    // immediateRender: true ensures card starts at scale 0.9 before any scroll.
+    // Entry: scales up from 0.9 → 1.0 as the section scrolls into view
     gsap.fromTo(card1Ref.current,
       { scale: 0.9, borderRadius: PEAK.radius },
       {
         scale: 1,
         borderRadius: FLAT_RADIUS,
         force3D: true,
-        immediateRender: true,
         scrollTrigger: {
           trigger: containerRef.current,
           start: "top-=80 bottom",
@@ -44,49 +42,55 @@ export default function KprTransition() {
       }
     );
 
-    // Pinned ramp: freeze scroll, gradually introduce tilt.
-    // gsap.to() avoids competing `from` values that override the entry.
-    // invalidateOnRefresh re-captures start values when the trigger activates,
-    // so it correctly picks up the entry's end state (scale 1, radius 24px).
-    gsap.to(card1Ref.current, {
-      scale: RAMP.scale,
-      borderRadius: RAMP.radius,
-      rotateX: -RAMP.angle,
-      y: -RAMP.y,
-      transformPerspective: PERSPECTIVE,
-      force3D: true,
-      scrollTrigger: {
-        trigger: card1Ref.current,
-        start: "bottom bottom",
-        end: `+=${PIN_DISTANCE}`,
-        pin: card1WrapperRef.current,
-        pinSpacing: true,
-        anticipatePin: 1,
-        scrub: 0.6,
-        invalidateOnRefresh: true,
+    // Pinned ramp: scroll freezes, card gradually tilts from flat to ramp angle.
+    // fromTo with immediateRender: false prevents competing with the entry animation.
+    gsap.fromTo(card1Ref.current,
+      { scale: 1, borderRadius: FLAT_RADIUS, rotateX: 0, y: 0, transformPerspective: PERSPECTIVE },
+      {
+        scale: RAMP.scale,
+        borderRadius: RAMP.radius,
+        rotateX: -RAMP.angle,
+        y: -RAMP.y,
+        transformPerspective: PERSPECTIVE,
+        force3D: true,
+        immediateRender: false,
+        scrollTrigger: {
+          trigger: card1Ref.current,
+          start: "bottom bottom",
+          end: `+=${PIN_DISTANCE}`,
+          pin: card1WrapperRef.current,
+          pinSpacing: true,
+          anticipatePin: 1,
+          scrub: 0.6,
+        }
       }
-    });
+    );
 
-    // Exit: continue rotation after unpin
-    gsap.to(card1Ref.current, {
-      scale: PEAK.scale,
-      borderRadius: PEAK.radius,
-      rotateX: -PEAK.angle,
-      y: -PEAK.y,
-      transformPerspective: PERSPECTIVE,
-      force3D: true,
-      scrollTrigger: {
-        trigger: card1Ref.current,
-        start: "bottom bottom",
-        end: "bottom top",
-        scrub: 0.6,
-        invalidateOnRefresh: true,
+    // Exit rotation: after unpin, card continues tilting and receding.
+    // Uses the marker div (positioned after the pin-spacer in DOM) as trigger
+    // to avoid overlapping with the pin animation's scroll range.
+    gsap.fromTo(card1Ref.current,
+      { scale: RAMP.scale, borderRadius: RAMP.radius, rotateX: -RAMP.angle, y: -RAMP.y, transformPerspective: PERSPECTIVE },
+      {
+        scale: PEAK.scale,
+        borderRadius: PEAK.radius,
+        rotateX: -PEAK.angle,
+        y: -PEAK.y,
+        transformPerspective: PERSPECTIVE,
+        force3D: true,
+        immediateRender: false,
+        scrollTrigger: {
+          trigger: "#end-of-problem-marker",
+          start: "top bottom",
+          end: "top top",
+          scrub: 0.6,
+        }
       }
-    });
+    );
 
     // ── CARD 2 (Solution) — Mirror ───────────────────────────────────
 
-    // Entry: scroll in with rotation, reducing from peak toward ramp
+    // Entry: scrolls in from peak rotation, reducing toward ramp angle
     gsap.fromTo(card2Ref.current,
       { scale: PEAK.scale, borderRadius: PEAK.radius, rotateX: PEAK.angle, transformPerspective: PERSPECTIVE },
       {
@@ -95,7 +99,6 @@ export default function KprTransition() {
         rotateX: RAMP.angle,
         transformPerspective: PERSPECTIVE,
         force3D: true,
-        immediateRender: true,
         scrollTrigger: {
           trigger: card2WrapperRef.current,
           start: "top-=200 bottom",
@@ -105,24 +108,26 @@ export default function KprTransition() {
       }
     );
 
-    // Pinned flatten: freeze scroll, settle from ramp to flat.
-    // gsap.to() with invalidateOnRefresh captures the entry's end state.
-    gsap.to(card2Ref.current, {
-      scale: 1,
-      borderRadius: FLAT_RADIUS,
-      rotateX: 0,
-      force3D: true,
-      scrollTrigger: {
-        trigger: card2Ref.current,
-        start: "top top",
-        end: `+=${PIN_DISTANCE}`,
-        pin: card2WrapperRef.current,
-        pinSpacing: true,
-        anticipatePin: 1,
-        scrub: 0.6,
-        invalidateOnRefresh: true,
+    // Pinned flatten: scroll freezes, card settles from ramp angle to flat.
+    gsap.fromTo(card2Ref.current,
+      { scale: RAMP.scale, borderRadius: RAMP.radius, rotateX: RAMP.angle, transformPerspective: PERSPECTIVE },
+      {
+        scale: 1,
+        borderRadius: FLAT_RADIUS,
+        rotateX: 0,
+        force3D: true,
+        immediateRender: false,
+        scrollTrigger: {
+          trigger: card2Ref.current,
+          start: "top top",
+          end: `+=${PIN_DISTANCE}`,
+          pin: card2WrapperRef.current,
+          pinSpacing: true,
+          anticipatePin: 1,
+          scrub: 0.6,
+        }
       }
-    });
+    );
 
   }, { scope: containerRef });
 
@@ -134,9 +139,8 @@ export default function KprTransition() {
       {/* Card 1: Problem Section */}
       <div ref={card1WrapperRef} className="relative w-full z-10 -mt-16 -mb-40">
         <div
-          className="relative w-full overflow-hidden origin-bottom border-x border-b border-white/[0.1] shadow-[0_20px_50px_rgba(0,0,0,0.5),0_30px_60px_-15px_rgba(0,238,255,0.08),0_30px_60px_-15px_rgba(153,0,255,0.08),20px_0_40px_-12px_rgba(255,255,255,0.04),-20px_0_40px_-12px_rgba(255,255,255,0.04),0_4px_20px_-4px_rgba(255,255,255,0.12)] z-10"
+          className="relative w-full overflow-hidden origin-bottom border-x border-b border-white/[0.1] shadow-[0_20px_50px_rgba(0,0,0,0.5),0_30px_60px_-15px_rgba(0,238,255,0.08),0_30px_60px_-15px_rgba(153,0,255,0.08),20px_0_40px_-12px_rgba(255,255,255,0.04),-20px_0_40px_-12px_rgba(255,255,255,0.04),0_4px_20px_-4px_rgba(255,255,255,0.12)] transform-gpu z-10"
           ref={card1Ref}
-          style={{ transform: "scale(0.9)", borderRadius: "64px" }}
         >
           <GlassFlow />
         </div>
@@ -163,7 +167,7 @@ export default function KprTransition() {
       {/* Card 2: Solution Section */}
       <div ref={card2WrapperRef} className="relative w-full z-10 -mt-40">
         <div
-          className="relative w-full overflow-hidden origin-top border-x border-t border-white/[0.1] border-t-white/[0.15] shadow-[0_-20px_50px_rgba(0,0,0,0.5),0_0_60px_rgba(0,238,255,0.06),0_0_60px_rgba(153,0,255,0.06),20px_0_40px_-12px_rgba(255,255,255,0.04),-20px_0_40px_-12px_rgba(255,255,255,0.04),0_-4px_20px_-4px_rgba(255,255,255,0.12)] z-10"
+          className="relative w-full overflow-hidden origin-top border-x border-t border-white/[0.1] border-t-white/[0.15] shadow-[0_-20px_50px_rgba(0,0,0,0.5),0_0_60px_rgba(0,238,255,0.06),0_0_60px_rgba(153,0,255,0.06),20px_0_40px_-12px_rgba(255,255,255,0.04),-20px_0_40px_-12px_rgba(255,255,255,0.04),0_-4px_20px_-4px_rgba(255,255,255,0.12)] transform-gpu z-10"
           ref={card2Ref}
         >
           <Solution />
