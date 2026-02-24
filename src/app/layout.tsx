@@ -31,8 +31,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body className="bg-black min-h-screen text-white antialiased bg-mesh-gradient">
+    <html lang="en" className={`${inter.variable} overflow-x-hidden`}>
+      <body className="bg-black min-h-screen text-white antialiased bg-mesh-gradient overflow-x-hidden">
         {children}
       </body>
     </html>
