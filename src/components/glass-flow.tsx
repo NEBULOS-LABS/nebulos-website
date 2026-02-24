@@ -36,9 +36,10 @@ export default function GlassFlow() {
         ref={cardRef}
         className="w-full bg-black/40 backdrop-blur-[24px] overflow-hidden relative"
       >
-        {/* Internal ambient glowing effects */}
-        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
+        {/* Ambient edge glow — sides and bottom only, top edge excluded */}
+        <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-white/[0.04] to-transparent pointer-events-none" />
+        <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-white/[0.04] to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white/[0.04] to-transparent pointer-events-none" />
 
         <div className="relative z-10 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
           
@@ -46,7 +47,7 @@ export default function GlassFlow() {
             className="flex flex-col items-center space-y-16"
           >
             {/* Header */}
-            <h2 className="glass-anim opacity-0 text-4xl sm:text-5xl lg:text-7xl font-bold text-center tracking-tight text-white mb-4 leading-[1.1]" style={{ transform: "translateY(20px)" }}>
+            <h2 className="glass-anim text-4xl sm:text-5xl lg:text-7xl font-bold text-center tracking-tight text-white mb-4 leading-[1.1]">
               Your growth is bottlenecked by code <br/>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00ffff] to-[#ff00ff] italic">
                 you don't have time to write.
@@ -77,8 +78,7 @@ export default function GlassFlow() {
               ].map((item, index) => (
                 <div
                   key={index}
-                  className="glass-anim opacity-0 flex flex-col h-full bg-white/5 backdrop-blur-3xl border border-white/10 rounded-3xl p-6 group hover:bg-white/10 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.3)] relative overflow-hidden"
-                  style={{ transform: "translateY(20px)" }}
+                  className="glass-anim flex flex-col h-full bg-white/5 backdrop-blur-3xl border border-white/10 rounded-3xl p-6 group hover:bg-white/10 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.3)] relative overflow-hidden"
                 >
                   <div className="absolute inset-0 bg-gradient-to-tr from-[#9900ff]/5 to-[#00eeff]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <div className="relative h-48 mb-6 overflow-hidden rounded-2xl border border-white/5">
@@ -103,8 +103,7 @@ export default function GlassFlow() {
 
             {/* Hidden Cost */}
             <div
-              className="glass-anim opacity-0 w-full bg-black/40 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-10 lg:p-16 relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
-              style={{ transform: "translateY(20px)" }}
+              className="glass-anim w-full bg-black/40 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-10 lg:p-16 relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
             >
               <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#ff00ff]/20 blur-[120px] rounded-full pointer-events-none" />
               <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-[#00eeff]/20 blur-[120px] rounded-full pointer-events-none" />
