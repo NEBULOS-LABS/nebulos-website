@@ -266,9 +266,17 @@ function buildGuaranteeHover(tl: gsap.core.Timeline, card: HTMLElement) {
   const approveBtn = card.querySelector("[data-sol-approve-btn]");
   const approveText = card.querySelector("[data-sol-approve-text]");
   const header = card.querySelector("[data-sol-deliverables-header]");
+  const completionBadge = card.querySelector("[data-sol-completion-badge]");
+  const progressRing = card.querySelector("[data-sol-progress-ring]");
 
   // Anticipation: items micro-dip
   if (checkItems.length) tl.to(checkItems, { y: 1, duration: 0.08 }, 0);
+
+  // Completion badge brightens
+  if (completionBadge) tl.to(completionBadge, { scale: 1.08, opacity: 1, duration: 0.25, ease: "back.out(1.3)" }, 0);
+
+  // Progress ring scales subtly
+  if (progressRing) tl.to(progressRing, { scale: 1.1, duration: 0.3 }, 0);
 
   // Items cascade stamp
   if (checkItems.length) tl.to(checkItems, { y: -2, stagger: 0.07, duration: 0.2 }, 0.06);
@@ -290,6 +298,10 @@ function buildGuaranteeHover(tl: gsap.core.Timeline, card: HTMLElement) {
 
   // Header brightens
   if (header) tl.to(header, { opacity: 0.7, duration: 0.2 }, 0.35);
+
+  // Chrome text brightens
+  const chromeRight = card.querySelector("[data-sol-chrome-right]");
+  if (chromeRight) tl.to(chromeRight, { opacity: 0.55, duration: 0.2 }, 0.3);
 }
 
 /* ── Main Component ─────────────────────────────────────────────── */
@@ -465,31 +477,38 @@ export default function Solution() {
 
 /* Sprint Approval */
 [data-sol-check-icon] {
-  animation: sol-check-glow 8s ease-in-out infinite;
+  animation: sol-check-glow 6s ease-in-out infinite;
 }
 [data-sol-check-item]:nth-child(1) [data-sol-check-icon] { animation-delay: 0s; }
-[data-sol-check-item]:nth-child(2) [data-sol-check-icon] { animation-delay: -2s; }
-[data-sol-check-item]:nth-child(3) [data-sol-check-icon] { animation-delay: -4s; }
-[data-sol-check-item]:nth-child(4) [data-sol-check-icon] { animation-delay: -6s; }
+[data-sol-check-item]:nth-child(2) [data-sol-check-icon] { animation-delay: -1.5s; }
+[data-sol-check-item]:nth-child(3) [data-sol-check-icon] { animation-delay: -3s; }
+[data-sol-check-item]:nth-child(4) [data-sol-check-icon] { animation-delay: -4.5s; }
 [data-sol-approved-badge] {
   background-size: 200% 100%;
   background-image: linear-gradient(
     90deg,
-    rgba(16,185,129,0.1) 0%,
-    rgba(16,185,129,0.05) 25%,
-    rgba(255,255,255,0.08) 50%,
-    rgba(16,185,129,0.05) 75%,
-    rgba(16,185,129,0.1) 100%
+    rgba(16,185,129,0.15) 0%,
+    rgba(16,185,129,0.08) 25%,
+    rgba(255,255,255,0.12) 50%,
+    rgba(16,185,129,0.08) 75%,
+    rgba(16,185,129,0.15) 100%
   );
-  animation: sol-badge-shimmer 10s ease-in-out infinite;
+  animation: sol-badge-shimmer 8s ease-in-out infinite;
 }
 [data-sol-check-item]:nth-child(1) [data-sol-approved-badge] { animation-delay: 0s; }
-[data-sol-check-item]:nth-child(2) [data-sol-approved-badge] { animation-delay: -2.5s; }
-[data-sol-check-item]:nth-child(3) [data-sol-approved-badge] { animation-delay: -5s; }
-[data-sol-check-item]:nth-child(4) [data-sol-approved-badge] { animation-delay: -7.5s; }
+[data-sol-check-item]:nth-child(2) [data-sol-approved-badge] { animation-delay: -2s; }
+[data-sol-check-item]:nth-child(3) [data-sol-approved-badge] { animation-delay: -4s; }
+[data-sol-check-item]:nth-child(4) [data-sol-approved-badge] { animation-delay: -6s; }
 [data-sol-approve-btn] > div > div:first-child {
   background-size: 200% 200%;
-  animation: sol-gradient-shift 6s ease-in-out infinite;
+  animation: sol-gradient-shift 5s ease-in-out infinite;
+}
+[data-sol-completion-badge] {
+  animation: sol-breathe 4s ease-in-out infinite;
+  color: rgba(52,211,153,0.9);
+}
+[data-sol-progress-ring] {
+  animation: sol-float 4s ease-in-out infinite;
 }
 `;
     document.head.appendChild(style);
@@ -731,12 +750,12 @@ export default function Solution() {
               <div className="relative z-10 px-5 lg:px-6 pb-5 lg:pb-6 -mt-2">
                 <div className="flex items-center gap-3 mb-3">
                   <span
-                    className="text-[10px] uppercase tracking-[0.25em] font-medium"
-                    style={{ color: card.overlineColor }}
+                    className="text-[12px] uppercase tracking-[0.2em] font-semibold"
+                    style={{ color: card.overlineColor, textShadow: `0 0 12px ${card.overlineColor}40` }}
                   >
                     {card.overline}
                   </span>
-                  <span className="text-[11px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#9900ff] via-[#ff00ff] to-[#00eeff] px-2 py-0.5 rounded-full border border-white/[0.08]">
+                  <span className="text-[12px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#9900ff] via-[#ff00ff] to-[#00eeff] px-2.5 py-0.5 rounded-full border border-white/[0.10]">
                     {card.stat}
                   </span>
                 </div>
@@ -799,9 +818,9 @@ function MockupChrome({ title, right }: { title: string; right?: string }) {
     <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/[0.06]">
       <div className="flex items-center gap-2">
         <div className="flex gap-1.5">
-          <div className="w-2 h-2 rounded-full bg-white/20" />
-          <div className="w-2 h-2 rounded-full bg-white/20" />
-          <div className="w-2 h-2 rounded-full bg-white/20" />
+          <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]/80" />
+          <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]/80" />
+          <div className="w-2.5 h-2.5 rounded-full bg-[#28c840]/80" />
         </div>
         <span className="text-[10px] text-white/40 ml-1">{title}</span>
       </div>
@@ -896,9 +915,9 @@ function AIEditorMockup() {
       {/* Tab bar */}
       <div className="flex items-center gap-0 border-b border-white/[0.06]">
         <div className="flex gap-1.5 px-3 py-2">
-          <div className="w-2 h-2 rounded-full bg-white/20" />
-          <div className="w-2 h-2 rounded-full bg-white/20" />
-          <div className="w-2 h-2 rounded-full bg-white/20" />
+          <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]/80" />
+          <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]/80" />
+          <div className="w-2.5 h-2.5 rounded-full bg-[#28c840]/80" />
         </div>
         <div className="flex">
           <span data-sol-tab-active className="text-[9px] px-3 py-2 text-white/60 bg-white/[0.04] border-b border-[#9900ff]/40">
@@ -1048,18 +1067,18 @@ function AnalyticsDashMockup() {
       <MockupChrome title="Analytics" right="This Quarter" />
 
       {/* Two chart cards side by side */}
-      <div className="grid grid-cols-2 gap-2 p-3">
+      <div className="grid grid-cols-2 gap-2 p-2.5">
         {/* Revenue Impact chart */}
         <div
           data-sol-mockup-item
           data-sol-chart-revenue
-          className="p-3 rounded-lg bg-white/[0.03] border border-white/[0.04]"
+          className="p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.04]"
         >
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-1.5">
             <span className="text-[9px] text-white/40">Revenue Impact</span>
-            <span className="text-[9px] text-emerald-400/70">+38%</span>
+            <span className="text-[9px] text-emerald-400/80 font-medium">+38%</span>
           </div>
-          <svg viewBox="0 0 100 40" className="w-full h-8">
+          <svg viewBox="0 0 100 50" className="w-full h-14">
             <defs>
               <linearGradient
                 id="sol-chart-fill"
@@ -1068,23 +1087,26 @@ function AnalyticsDashMockup() {
                 x2="0"
                 y2="1"
               >
-                <stop offset="0%" stopColor="#00eeff" stopOpacity="0.3" />
-                <stop offset="100%" stopColor="#00eeff" stopOpacity="0" />
+                <stop offset="0%" stopColor="#00eeff" stopOpacity="0.35" />
+                <stop offset="100%" stopColor="#00eeff" stopOpacity="0.02" />
               </linearGradient>
             </defs>
             <path
               data-sol-chart-line
-              d="M 0 35 Q 15 30 25 28 T 50 20 T 75 12 T 100 5"
+              d="M 0 42 Q 10 38 20 35 T 40 28 T 60 18 T 80 10 T 100 4"
               fill="none"
               stroke="#00eeff"
               strokeWidth="1.5"
-              strokeOpacity="0.6"
+              strokeOpacity="0.7"
             />
             <path
               data-sol-chart-area
-              d="M 0 35 Q 15 30 25 28 T 50 20 T 75 12 T 100 5 L 100 40 L 0 40 Z"
+              d="M 0 42 Q 10 38 20 35 T 40 28 T 60 18 T 80 10 T 100 4 L 100 50 L 0 50 Z"
               fill="url(#sol-chart-fill)"
             />
+            {/* Data point dot at peak */}
+            <circle cx="100" cy="4" r="2" fill="#00eeff" opacity="0.9" />
+            <circle data-sol-stat-dot cx="100" cy="4" r="4" fill="#00eeff" opacity="0.2" />
           </svg>
         </div>
 
@@ -1092,20 +1114,20 @@ function AnalyticsDashMockup() {
         <div
           data-sol-mockup-item
           data-sol-chart-conversion
-          className="p-3 rounded-lg bg-white/[0.03] border border-white/[0.04]"
+          className="p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.04]"
         >
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-1.5">
             <span className="text-[9px] text-white/40">Conversion</span>
-            <span className="text-[9px] text-[#9900ff]">
+            <span className="text-[9px] text-[#9900ff] font-medium">
               2.4x &#9650;
             </span>
           </div>
-          <div className="flex items-end gap-1 h-8">
-            {[30, 45, 55, 70, 85, 95].map((h, i) => (
+          <div className="flex items-end gap-1 h-14">
+            {[25, 40, 50, 65, 78, 92].map((h, i) => (
               <div
                 key={i}
                 data-sol-bar
-                className="flex-1 rounded-sm bg-gradient-to-t from-[#9900ff]/40 to-[#9900ff]/20"
+                className="flex-1 rounded-sm bg-gradient-to-t from-[#9900ff]/50 to-[#ff00ff]/25"
                 style={{ height: `${h}%` }}
               />
             ))}
@@ -1113,29 +1135,31 @@ function AnalyticsDashMockup() {
         </div>
       </div>
 
-      {/* Stats row */}
+      {/* Key metrics row */}
+      <div className="grid grid-cols-2 gap-2 px-2.5 pb-1.5">
+        <div data-sol-mockup-item className="p-2 rounded-md bg-white/[0.02] border border-white/[0.03]">
+          <span className="text-[8px] text-white/30 block mb-0.5">Bounce rate</span>
+          <span data-sol-stat-value className="text-[11px] font-semibold text-emerald-400/80">-23%</span>
+        </div>
+        <div data-sol-mockup-item className="p-2 rounded-md bg-white/[0.02] border border-white/[0.03]">
+          <span className="text-[8px] text-white/30 block mb-0.5">Load time</span>
+          <span data-sol-stat-value className="text-[11px] font-semibold text-[#00eeff]/80">1.2s</span>
+        </div>
+      </div>
+
+      {/* Bottom stats strip */}
       <div
         data-sol-mockup-item
-        className="grid grid-cols-2 gap-x-4 gap-y-1 px-3 pb-3"
+        className="flex items-center justify-between px-2.5 pb-2.5 pt-1"
       >
         {[
-          { label: "Bounce rate", value: "-23%", color: "text-emerald-400/60" },
-          { label: "Load time", value: "1.2s", color: "text-[#00eeff]/60" },
-          {
-            label: "User retention",
-            value: "+41%",
-            color: "text-emerald-400/60",
-          },
-          {
-            label: "Core vitals",
-            value: "All green",
-            color: "text-emerald-400/60",
-          },
+          { label: "Retention", value: "+41%", color: "text-emerald-400/70" },
+          { label: "Vitals", value: "All green", color: "text-emerald-400/70" },
         ].map((stat) => (
           <div key={stat.label} className="flex items-center gap-1.5">
-            <div data-sol-stat-dot className="w-1 h-1 rounded-full bg-white/20" />
+            <div data-sol-stat-dot className="w-1.5 h-1.5 rounded-full bg-emerald-400/30" />
             <span data-sol-stat-label className="text-[8px] text-white/30">{stat.label}</span>
-            <span data-sol-stat-value className={`text-[8px] ${stat.color} ml-auto`}>
+            <span data-sol-stat-value className={`text-[8px] ${stat.color} font-medium`}>
               {stat.value}
             </span>
           </div>
@@ -1159,17 +1183,28 @@ function SprintApprovalMockup() {
     <div className="rounded-xl bg-[#0a0a14] border border-white/[0.06] overflow-hidden">
       <MockupChrome title="Sprint Review" right="Sprint #4" />
 
-      {/* Checklist header */}
-      <div data-sol-mockup-item data-sol-deliverables-header className="px-3 pt-3 pb-1">
-        <div className="flex items-center justify-between text-[9px] text-white/30 mb-2">
-          <span>Deliverables</span>
-          <span>Status</span>
+      {/* Completion header with progress ring */}
+      <div data-sol-mockup-item data-sol-deliverables-header className="px-3 pt-3 pb-1.5">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            {/* Mini progress ring */}
+            <svg data-sol-progress-ring width="20" height="20" viewBox="0 0 20 20" className="flex-shrink-0">
+              <circle cx="10" cy="10" r="8" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2" />
+              <circle cx="10" cy="10" r="8" fill="none" stroke="#28c840" strokeWidth="2"
+                strokeDasharray="50.26" strokeDashoffset="0" strokeLinecap="round"
+                transform="rotate(-90 10 10)" opacity="0.8" />
+            </svg>
+            <span className="text-[9px] text-white/40 font-medium">4/4 Deliverables</span>
+          </div>
+          <span data-sol-completion-badge className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400/90 border border-emerald-500/25 font-medium">
+            100%
+          </span>
         </div>
-        <div className="h-px bg-white/[0.06]" />
+        <div className="h-px bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
       </div>
 
       {/* Checklist items */}
-      <div className="px-3 py-1 space-y-1">
+      <div className="px-3 py-1.5 space-y-1">
         {items.map((item) => (
           <div
             key={item}
@@ -1178,12 +1213,12 @@ function SprintApprovalMockup() {
             className="flex items-center justify-between py-1.5"
           >
             <div className="flex items-center gap-2">
-              <div data-sol-check-icon className="w-4 h-4 rounded bg-emerald-500/20 flex items-center justify-center">
+              <div data-sol-check-icon className="w-4 h-4 rounded bg-emerald-500/25 flex items-center justify-center border border-emerald-500/20">
                 <span className="text-[8px] text-emerald-400">&#10003;</span>
               </div>
-              <span className="text-[10px] text-white/60">{item}</span>
+              <span className="text-[10px] text-white/65">{item}</span>
             </div>
-            <span data-sol-approved-badge className="text-[8px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400/70 border border-emerald-500/20">
+            <span data-sol-approved-badge className="text-[8px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400/80 border border-emerald-500/25">
               Approved
             </span>
           </div>
@@ -1193,10 +1228,11 @@ function SprintApprovalMockup() {
       {/* Approve CTA */}
       <div data-sol-highlight data-sol-approve-btn className="px-3 pb-3 pt-2">
         <div className="flex items-center gap-2">
-          <div className="flex-1 text-center py-2 rounded-lg text-[10px] font-medium text-white/80 bg-gradient-to-r from-[#9900ff]/20 to-[#00eeff]/20 border border-[#9900ff]/30">
+          <div className="flex-1 text-center py-2 rounded-lg text-[10px] font-semibold text-white/90 bg-gradient-to-r from-[#9900ff]/30 to-[#00eeff]/30 border border-[#9900ff]/40"
+            style={{ boxShadow: "0 0 20px rgba(153,0,255,0.08), inset 0 1px 0 rgba(255,255,255,0.06)" }}>
             &#10003; Approve &amp; Pay Sprint
           </div>
-          <span data-sol-approve-text className="text-[8px] text-white/25 whitespace-nowrap">
+          <span data-sol-approve-text className="text-[8px] text-white/30 whitespace-nowrap">
             $0 if not satisfied
           </span>
         </div>
