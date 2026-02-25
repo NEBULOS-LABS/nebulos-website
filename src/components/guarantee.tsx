@@ -1,11 +1,14 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import { motion, useInView, useScroll, useTransform } from "framer-motion";
-import { fadeIn, staggerContainer } from "@/lib/animations";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import { Shield, Code2, KeyRound, ArrowRight } from "lucide-react";
 
-/* ─── Animated Counter ───────────────────────────────────────────── */
+gsap.registerPlugin(ScrollTrigger);
+
+/* ─── Animated Counter (rAF, cubic ease-out) ─────────────────────── */
 
 function Counter({
   value,
@@ -22,17 +25,14 @@ function Counter({
   useEffect(() => {
     if (!active || animated.current) return;
     animated.current = true;
-
     const start = performance.now();
     const duration = 2200;
-
     const tick = (now: number) => {
       const t = Math.min((now - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - t, 3); // cubic ease-out
+      const eased = 1 - Math.pow(1 - t, 3);
       setDisplay(Math.floor(eased * value));
       if (t < 1) requestAnimationFrame(tick);
     };
-
     requestAnimationFrame(tick);
   }, [active, value]);
 
@@ -44,7 +44,7 @@ function Counter({
   );
 }
 
-/* ─── Data ───────────────────────────────────────────────────────── */
+/* ─── Data ────────────────────────────────────────────────────────── */
 
 const guarantees = [
   {
@@ -53,7 +53,7 @@ const guarantees = [
     description:
       "Review working software every 14 days. If a sprint misses the mark, you pay nothing for it — no questions, no process, no fine print.",
     gradient: "from-[#9900ff] to-[#ff00ff]",
-    glow: "#9900ff",
+    glowColor: "#9900ff",
   },
   {
     icon: Code2,
@@ -61,7 +61,7 @@ const guarantees = [
     description:
       "Found a bug six months post-launch? Two years? We fix it. Free. Forever. Your codebase stays bulletproof for life.",
     gradient: "from-[#00eeff] to-[#9900ff]",
-    glow: "#00eeff",
+    glowColor: "#00eeff",
   },
   {
     icon: KeyRound,
@@ -69,7 +69,7 @@ const guarantees = [
     description:
       "Every line, every asset, every commit — 100% yours from the first push. No lock-in, no licensing games, no strings.",
     gradient: "from-[#ff00ff] to-[#00eeff]",
-    glow: "#ff00ff",
+    glowColor: "#ff00ff",
   },
 ];
 
@@ -79,220 +79,628 @@ const stats = [
   { value: 98, suffix: "%", label: "Sprint Approval" },
 ];
 
-/* Card cascade offsets (desktop only) */
-const offsets = ["lg:ml-0", "lg:ml-8", "lg:ml-16"];
-
-/* ─── Component ──────────────────────────────────────────────────── */
+/* ─── Component ───────────────────────────────────────────────────── */
 
 export default function Guarantee() {
   const sectionRef = useRef<HTMLElement>(null);
+  const separatorRef = useRef<HTMLDivElement>(null);
+  const overlineRef = useRef<HTMLDivElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const subtitleRef = useRef<HTMLParagraphElement>(null);
   const statsRef = useRef<HTMLDivElement>(null);
-  const statsInView = useInView(statsRef, { once: true, amount: 0.6 });
+  const ctaRef = useRef<HTMLDivElement>(null);
+  const ctaBtnRef = useRef<HTMLAnchorElement>(null);
+  const ctaTextRef = useRef<HTMLSpanElement>(null);
+  const orbRef1 = useRef<HTMLDivElement>(null);
+  const orbRef2 = useRef<HTMLDivElement>(null);
 
-  /* Background parallax */
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
-  });
-  const orbY1 = useTransform(scrollYProgress, [0, 1], [80, -80]);
-  const orbY2 = useTransform(scrollYProgress, [0, 1], [60, -60]);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const hoverTimelines = useRef<(gsap.core.Timeline | null)[]>([]);
+  const ctaXTo = useRef<gsap.QuickToFunc | null>(null);
+  const ctaYTo = useRef<gsap.QuickToFunc | null>(null);
+  const ctaTextXTo = useRef<gsap.QuickToFunc | null>(null);
+  const ctaTextYTo = useRef<gsap.QuickToFunc | null>(null);
 
+  const [statsActive, setStatsActive] = useState(false);
+
+  /* ── GSAP master setup ────────────────────────────────────────── */
+  useGSAP(
+    () => {
+      if (!sectionRef.current) return;
+      const mm = gsap.matchMedia();
+
+      /* ── Background orb parallax ─────────────────────────────── */
+      if (orbRef1.current) {
+        gsap.to(orbRef1.current, {
+          y: -160,
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 1,
+          },
+        });
+      }
+      if (orbRef2.current) {
+        gsap.to(orbRef2.current, {
+          y: -120,
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 1,
+          },
+        });
+      }
+
+      /* ── Entrance timeline (plays once) ──────────────────────── */
+      const entranceTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 78%",
+          toggleActions: "play none none none",
+        },
+      });
+
+      if (separatorRef.current) {
+        entranceTl.fromTo(
+          separatorRef.current,
+          { scaleX: 0 },
+          { scaleX: 1, duration: 1.2, ease: "power2.out" },
+          0
+        );
+      }
+
+      if (overlineRef.current) {
+        entranceTl.fromTo(
+          overlineRef.current,
+          { y: 20, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" },
+          0.15
+        );
+      }
+
+      /* Heading reveal — always fade-up (works on both desktop + mobile) */
+      if (headingRef.current) {
+        entranceTl.fromTo(
+          headingRef.current,
+          { y: 30, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" },
+          0.25
+        );
+      }
+
+      if (subtitleRef.current) {
+        entranceTl.fromTo(
+          subtitleRef.current,
+          { y: 20, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" },
+          0.55
+        );
+      }
+
+      /* ── Stats counter trigger ───────────────────────────────── */
+      if (statsRef.current) {
+        entranceTl.fromTo(
+          statsRef.current,
+          { y: 20, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" },
+          0.7
+        );
+
+        ScrollTrigger.create({
+          trigger: statsRef.current,
+          start: "top 80%",
+          once: true,
+          onEnter: () => setStatsActive(true),
+        });
+      }
+
+      /* ── CTA entrance ────────────────────────────────────────── */
+      if (ctaRef.current) {
+        gsap.fromTo(
+          ctaRef.current,
+          { y: 30, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.7,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: ctaRef.current,
+              start: "top 88%",
+              toggleActions: "play none none none",
+            },
+          }
+        );
+      }
+
+      /* ── Per-card scroll-driven entrance (scrub) ─────────────── */
+      mm.add(
+        {
+          isDesktop: "(min-width: 1024px)",
+          isMobile: "(max-width: 1023px)",
+        },
+        (context) => {
+          const { isDesktop } = context.conditions!;
+
+          cardRefs.current.forEach((card, i) => {
+            if (!card) return;
+
+            const accentBar = card.querySelector<HTMLElement>(
+              "[data-g-accent]"
+            );
+            const iconWrap = card.querySelector<HTMLElement>("[data-g-icon]");
+            const decoIcon = card.querySelector<HTMLElement>(
+              "[data-g-deco-icon]"
+            );
+
+            if (isDesktop) {
+              /* Desktop: scrub with blur + x + scale */
+              gsap.fromTo(
+                card,
+                { x: 70, opacity: 0, scale: 0.97, filter: "blur(6px)" },
+                {
+                  x: 0,
+                  opacity: 1,
+                  scale: 1,
+                  filter: "blur(0px)",
+                  force3D: true,
+                  scrollTrigger: {
+                    trigger: card,
+                    start: "top 88%",
+                    end: "top 45%",
+                    scrub: 0.6,
+                  },
+                }
+              );
+
+              /* Accent bar scaleY grow */
+              if (accentBar) {
+                gsap.fromTo(
+                  accentBar,
+                  { scaleY: 0, transformOrigin: "top" },
+                  {
+                    scaleY: 1,
+                    scrollTrigger: {
+                      trigger: card,
+                      start: "top 70%",
+                      end: "top 35%",
+                      scrub: 0.6,
+                    },
+                  }
+                );
+              }
+            } else {
+              /* Mobile: simple fade + y (no blur for perf) */
+              gsap.fromTo(
+                card,
+                { y: 40, opacity: 0 },
+                {
+                  y: 0,
+                  opacity: 1,
+                  duration: 0.7,
+                  ease: "power3.out",
+                  scrollTrigger: {
+                    trigger: card,
+                    start: "top 85%",
+                    toggleActions: "play none none none",
+                  },
+                }
+              );
+
+              if (accentBar) {
+                gsap.fromTo(
+                  accentBar,
+                  { scaleY: 0, transformOrigin: "top" },
+                  {
+                    scaleY: 1,
+                    duration: 0.5,
+                    delay: 0.2,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                      trigger: card,
+                      start: "top 80%",
+                      toggleActions: "play none none none",
+                    },
+                  }
+                );
+              }
+            }
+
+            /* Icon entrance pop (both desktop + mobile) */
+            if (iconWrap) {
+              gsap.fromTo(
+                iconWrap,
+                { scale: 0.6, opacity: 0 },
+                {
+                  scale: 1,
+                  opacity: 1,
+                  duration: 0.5,
+                  ease: "back.out(1.4)",
+                  scrollTrigger: {
+                    trigger: card,
+                    start: "top 65%",
+                    toggleActions: "play none none none",
+                  },
+                }
+              );
+            }
+
+            /* ── Hover timeline (paused, play/reverse) ─────────── */
+            const htl = gsap.timeline({
+              paused: true,
+              defaults: { ease: "power2.out" },
+            });
+
+            htl.to(
+              card,
+              {
+                y: -8,
+                boxShadow: "0 20px 50px rgba(0,0,0,0.5)",
+                duration: 0.35,
+              },
+              0
+            );
+
+            if (accentBar) {
+              htl.to(
+                accentBar,
+                { width: 3, opacity: 1, duration: 0.3 },
+                0
+              );
+            }
+
+            if (iconWrap) {
+              htl.to(iconWrap, { scale: 1.08, duration: 0.3 }, 0.05);
+            }
+
+            if (decoIcon) {
+              htl.to(
+                decoIcon,
+                { opacity: 0.08, rotate: 8, duration: 0.4 },
+                0.05
+              );
+            }
+
+            const glowOrb = card.querySelector<HTMLElement>("[data-g-glow]");
+            if (glowOrb) {
+              htl.to(glowOrb, { opacity: 0.25, scale: 1.2, duration: 0.4 }, 0);
+            }
+
+            const stepNum = card.querySelector<HTMLElement>(
+              "[data-g-step]"
+            );
+            if (stepNum) {
+              htl.to(stepNum, { opacity: 0.4, duration: 0.3 }, 0);
+            }
+
+            hoverTimelines.current[i] = htl;
+          });
+        }
+      );
+
+      /* ── Magnetic CTA (desktop only) ─────────────────────────── */
+      mm.add("(min-width: 1024px)", () => {
+        if (ctaBtnRef.current) {
+          ctaXTo.current = gsap.quickTo(ctaBtnRef.current, "x", {
+            duration: 0.5,
+            ease: "elastic.out(1, 0.3)",
+          });
+          ctaYTo.current = gsap.quickTo(ctaBtnRef.current, "y", {
+            duration: 0.5,
+            ease: "elastic.out(1, 0.3)",
+          });
+        }
+        if (ctaTextRef.current) {
+          ctaTextXTo.current = gsap.quickTo(ctaTextRef.current, "x", {
+            duration: 0.6,
+            ease: "elastic.out(1, 0.3)",
+          });
+          ctaTextYTo.current = gsap.quickTo(ctaTextRef.current, "y", {
+            duration: 0.6,
+            ease: "elastic.out(1, 0.3)",
+          });
+        }
+      });
+    },
+    { scope: sectionRef }
+  );
+
+  /* ── Card hover handlers ──────────────────────────────────────── */
+  const handleCardEnter = useCallback((i: number) => {
+    hoverTimelines.current[i]?.play();
+  }, []);
+
+  const handleCardLeave = useCallback((i: number) => {
+    hoverTimelines.current[i]?.reverse();
+  }, []);
+
+  /* ── Magnetic CTA handlers ────────────────────────────────────── */
+  const handleCtaMove = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>) => {
+      if (!ctaBtnRef.current || !ctaXTo.current) return;
+      const { clientX, clientY } = e;
+      const { left, top, width, height } =
+        ctaBtnRef.current.getBoundingClientRect();
+      const x = clientX - (left + width / 2);
+      const y = clientY - (top + height / 2);
+      ctaXTo.current(x * 0.2);
+      ctaYTo.current!(y * 0.2);
+      ctaTextXTo.current?.(x * 0.08);
+      ctaTextYTo.current?.(y * 0.08);
+    },
+    []
+  );
+
+  const handleCtaLeave = useCallback(() => {
+    ctaXTo.current?.(0);
+    ctaYTo.current?.(0);
+    ctaTextXTo.current?.(0);
+    ctaTextYTo.current?.(0);
+  }, []);
+
+  const handleCtaEnter = useCallback(() => {
+    if (!ctaBtnRef.current) return;
+    gsap.to(ctaBtnRef.current, {
+      boxShadow: "0 0 35px rgba(153,0,255,0.5)",
+      duration: 0.4,
+      ease: "power2.out",
+    });
+  }, []);
+
+  const handleCtaHoverEnd = useCallback(() => {
+    if (!ctaBtnRef.current) return;
+    gsap.to(ctaBtnRef.current, {
+      boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
+      duration: 0.4,
+      ease: "power2.out",
+    });
+  }, []);
+
+  /* ── Render ───────────────────────────────────────────────────── */
   return (
     <section
       ref={sectionRef}
       id="guarantee"
-      className="relative bg-black overflow-hidden py-20 lg:py-32"
+      className="relative bg-black overflow-hidden py-24 lg:py-36"
     >
-      {/* ── Background ───────────────────────────────────────────── */}
-      <motion.div
-        variants={{
-          hidden: { scaleX: 0 },
-          show: {
-            scaleX: 1,
-            transition: { duration: 1.2, ease: "easeOut" },
-          },
-        }}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true }}
+      {/* ── Background ─────────────────────────────────────────── */}
+      <div
+        ref={separatorRef}
         className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent origin-center"
+        style={{ transform: "scaleX(0)" }}
       />
 
-      <motion.div
+      <div
+        ref={orbRef1}
         className="absolute top-1/4 -left-40 w-[500px] h-[500px] bg-[#9900ff]/10 blur-[150px] rounded-full pointer-events-none"
-        style={{ y: orbY1 }}
       />
-      <motion.div
+      <div
+        ref={orbRef2}
         className="absolute bottom-1/4 -right-40 w-[400px] h-[400px] bg-[#00eeff]/10 blur-[120px] rounded-full pointer-events-none"
-        style={{ y: orbY2 }}
       />
 
+      {/* ── Content ────────────────────────────────────────────── */}
       <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
-        <motion.div
-          variants={staggerContainer(0.08, 0.1)}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.12 }}
-        >
-          {/* ── Overline ─────────────────────────────────────────── */}
-          <motion.div variants={fadeIn("up", 0)} className="mb-6 lg:mb-8">
-            <span className="inline-flex items-center rounded-full border border-white/15 bg-white/[0.03] px-4 py-1.5 text-[11px] font-medium tracking-[0.2em] text-gray-400 uppercase">
-              Our Guarantee
-            </span>
-          </motion.div>
+        {/* Overline */}
+        <div ref={overlineRef} className="mb-6 lg:mb-8" style={{ opacity: 0 }}>
+          <span className="inline-flex items-center rounded-full border border-white/15 bg-white/[0.03] px-4 py-1.5 text-[11px] font-medium tracking-[0.2em] text-gray-400 uppercase">
+            Our Guarantee
+          </span>
+        </div>
 
-          {/* ── Grid ─────────────────────────────────────────────── */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
-            {/* ── Left column ────────────────────────────────────── */}
-            <div className="lg:col-span-5">
-              <motion.h2
-                variants={fadeIn("up", 0.08)}
-                className="text-4xl sm:text-5xl lg:text-[3.25rem] font-bold tracking-tight leading-[1.1] mb-6"
-              >
-                You Don&apos;t Pay{" "}
-                <br className="hidden sm:block" />
-                Unless We{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#9900ff] via-[#ff00ff] to-[#ff00ff]">
-                  Deliver.
-                </span>
-              </motion.h2>
+        {/* ── Asymmetric Grid ────────────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
+          {/* ── Left Column (sticky on desktop) ────────────── */}
+          <div className="lg:col-span-5 lg:sticky lg:top-[20vh]">
+            <h2
+              ref={headingRef}
+              className="text-4xl sm:text-5xl lg:text-[3.25rem] font-bold tracking-tight leading-[1.1] mb-6"
+              style={{ opacity: 0 }}
+            >
+              You Don&apos;t Pay{" "}
+              <br className="hidden sm:block" />
+              Unless We{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#9900ff] via-[#ff00ff] to-[#ff00ff]">
+                Deliver.
+              </span>
+            </h2>
 
-              <motion.p
-                variants={fadeIn("up", 0.16)}
-                className="text-gray-400 text-lg leading-relaxed mb-10 max-w-md"
-              >
-                Every sprint is approval-gated. If the work doesn&apos;t meet
-                your standards, the invoice disappears. That&apos;s not a
-                slogan&nbsp;— it&apos;s how we&apos;ve operated across{" "}
-                <span className="text-white font-medium">
-                  120+ engagements
-                </span>
-                .
-              </motion.p>
+            <p
+              ref={subtitleRef}
+              className="text-gray-400 text-lg leading-relaxed mb-10 max-w-md"
+              style={{ opacity: 0 }}
+            >
+              Every sprint is approval-gated. If the work doesn&apos;t meet
+              your standards, the invoice disappears. That&apos;s not a
+              slogan&nbsp;— it&apos;s how we&apos;ve operated across{" "}
+              <span className="text-white font-medium">
+                120+ engagements
+              </span>
+              .
+            </p>
 
-              {/* Stats */}
-              <motion.div
-                ref={statsRef}
-                variants={fadeIn("up", 0.24)}
-                className="grid grid-cols-3 gap-4 lg:gap-6"
-              >
-                {stats.map((s, i) => (
-                  <div key={i}>
-                    <div className="text-3xl sm:text-4xl font-bold gradient-text">
-                      <Counter
-                        value={s.value}
-                        suffix={s.suffix}
-                        active={statsInView}
-                      />
-                    </div>
-                    <div className="text-[11px] sm:text-xs text-gray-500 mt-1.5 tracking-wide uppercase">
-                      {s.label}
-                    </div>
+            {/* Stats */}
+            <div
+              ref={statsRef}
+              className="grid grid-cols-3 gap-4 lg:gap-6 mb-10"
+              style={{ opacity: 0 }}
+            >
+              {stats.map((s, i) => (
+                <div key={i}>
+                  <div className="text-3xl sm:text-4xl font-bold gradient-text">
+                    <Counter
+                      value={s.value}
+                      suffix={s.suffix}
+                      active={statsActive}
+                    />
                   </div>
-                ))}
-              </motion.div>
+                  <div className="text-[11px] sm:text-xs text-gray-500 mt-1.5 tracking-wide uppercase">
+                    {s.label}
+                  </div>
+                </div>
+              ))}
             </div>
 
-            {/* ── Right column — Cards ───────────────────────────── */}
-            <div className="lg:col-span-7 flex flex-col gap-4">
-              {guarantees.map((g, i) => (
-                <motion.div
-                  key={i}
-                  variants={{
-                    hidden: {
-                      opacity: 0,
-                      x: 40,
-                      filter: "blur(8px)",
-                    },
-                    show: {
-                      opacity: 1,
-                      x: 0,
-                      filter: "blur(0px)",
-                      transition: {
-                        type: "tween",
-                        duration: 0.7,
-                        delay: 0.2 + i * 0.12,
-                        ease: [0.25, 0.1, 0.25, 1],
-                      },
-                    },
-                  }}
-                  className={offsets[i]}
+            {/* CTA — lives in left column (sticky = always visible) */}
+            <div ref={ctaRef} className="hidden lg:block" style={{ opacity: 0 }}>
+              <a
+                ref={ctaBtnRef}
+                href="#contact"
+                className="btn-primary-lg inline-block will-change-transform"
+                onMouseMove={handleCtaMove}
+                onMouseEnter={handleCtaEnter}
+                onMouseLeave={() => {
+                  handleCtaLeave();
+                  handleCtaHoverEnd();
+                }}
+              >
+                <span
+                  ref={ctaTextRef}
+                  className="relative z-10 inline-flex items-center gap-2 will-change-transform"
                 >
-                  <motion.div
-                    whileHover={{
-                      y: -6,
-                      transition: {
-                        type: "spring",
-                        stiffness: 400,
-                        damping: 25,
-                      },
-                    }}
-                    className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.025] backdrop-blur-sm cursor-default transition-colors duration-300 hover:border-white/[0.15] hover:bg-white/[0.04]"
-                  >
-                    {/* Left accent bar */}
-                    <div
-                      className={`absolute left-0 top-0 bottom-0 w-[2px] bg-gradient-to-b ${g.gradient} opacity-50 group-hover:opacity-100 transition-opacity duration-300`}
-                    />
-
-                    {/* Step number */}
-                    <div className="absolute top-5 right-5 text-[10px] font-mono text-white/[0.12] tracking-widest select-none">
-                      0{i + 1}
-                    </div>
-
-                    <div className="flex items-start gap-4 p-5 sm:p-6 lg:p-7">
-                      {/* Icon container */}
-                      <div
-                        className={`flex-shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br ${g.gradient} p-px`}
-                      >
-                        <div className="w-full h-full rounded-[11px] bg-[#0a0a0a] flex items-center justify-center">
-                          <g.icon className="w-5 h-5 text-white/80" />
-                        </div>
-                      </div>
-
-                      {/* Text */}
-                      <div className="flex-1 min-w-0 pr-6">
-                        <h3 className="text-[17px] font-semibold text-white mb-1.5 tracking-tight">
-                          {g.title}
-                        </h3>
-                        <p className="text-[15px] text-gray-400 leading-relaxed">
-                          {g.description}
-                        </p>
-                      </div>
-
-                      {/* Decorative large icon (visual weight) */}
-                      <div className="hidden md:flex flex-shrink-0 w-16 lg:w-20 items-center justify-center self-center">
-                        <g.icon
-                          className="w-12 h-12 lg:w-14 lg:h-14 text-white/[0.03] group-hover:text-white/[0.07] transition-colors duration-500"
-                          strokeWidth={1}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Hover glow */}
-                    <div
-                      className="absolute -bottom-10 -right-10 w-32 h-32 rounded-full blur-3xl opacity-0 group-hover:opacity-20 transition-opacity duration-500 pointer-events-none"
-                      style={{ background: g.glow }}
-                    />
-                  </motion.div>
-                </motion.div>
-              ))}
+                  Start Risk-Free
+                  <ArrowRight className="w-5 h-5" />
+                </span>
+              </a>
+              <p className="text-[13px] text-gray-500 mt-3 tracking-wide">
+                No contracts. Cancel anytime.
+              </p>
             </div>
           </div>
 
-          {/* ── CTA ──────────────────────────────────────────────── */}
-          <motion.div
-            variants={fadeIn("up", 0.5)}
-            className="text-center mt-16 lg:mt-20"
-          >
-            <a href="#contact" className="btn-primary-lg inline-block">
-              <span className="relative z-10 inline-flex items-center gap-2">
-                Start Risk-Free
-                <ArrowRight className="w-5 h-5" />
-              </span>
-            </a>
-          </motion.div>
-        </motion.div>
+          {/* ── Right Column — Scroll-driven Cards ─────────── */}
+          <div className="lg:col-span-7 flex flex-col gap-6 lg:gap-8">
+            {guarantees.map((g, i) => (
+              <div
+                key={i}
+                ref={(el) => {
+                  cardRefs.current[i] = el;
+                }}
+                className="g-card-idle"
+                style={{
+                  opacity: 0,
+                  animationDelay: `${i * 1.7}s`,
+                }}
+                onMouseEnter={() => handleCardEnter(i)}
+                onMouseLeave={() => handleCardLeave(i)}
+              >
+                <div className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.025] backdrop-blur-sm cursor-default">
+                  {/* Left accent bar */}
+                  <div
+                    data-g-accent
+                    className={`absolute left-0 top-0 bottom-0 w-[2px] bg-gradient-to-b ${g.gradient} opacity-50 g-accent-shimmer`}
+                    style={{ transformOrigin: "top", transform: "scaleY(0)" }}
+                  />
+
+                  {/* Step number */}
+                  <div
+                    data-g-step
+                    className="absolute top-5 right-5 text-xs font-mono text-white/[0.12] tracking-widest select-none"
+                  >
+                    0{i + 1}
+                  </div>
+
+                  <div className="flex items-start gap-5 p-6 sm:p-7 lg:p-8">
+                    {/* Icon container */}
+                    <div
+                      data-g-icon
+                      className={`flex-shrink-0 w-14 h-14 rounded-xl bg-gradient-to-br ${g.gradient} p-px`}
+                    >
+                      <div className="w-full h-full rounded-[11px] bg-[#0a0a0a] flex items-center justify-center">
+                        <g.icon className="w-6 h-6 text-white/80" />
+                      </div>
+                    </div>
+
+                    {/* Text */}
+                    <div className="flex-1 min-w-0 pr-8">
+                      <h3 className="text-lg font-semibold text-white mb-2 tracking-tight">
+                        {g.title}
+                      </h3>
+                      <p className="text-[15px] text-gray-400 leading-relaxed">
+                        {g.description}
+                      </p>
+                    </div>
+
+                    {/* Decorative large icon */}
+                    <div className="hidden md:flex flex-shrink-0 w-16 lg:w-20 items-center justify-center self-center">
+                      <g.icon
+                        data-g-deco-icon
+                        className="w-12 h-12 lg:w-14 lg:h-14 text-white/[0.03]"
+                        strokeWidth={1}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Hover glow */}
+                  <div
+                    data-g-glow
+                    className="absolute -bottom-10 -right-10 w-36 h-36 rounded-full blur-3xl opacity-0 pointer-events-none"
+                    style={{ background: g.glowColor }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Mobile CTA (below cards, not in sticky column) ── */}
+        <div className="lg:hidden text-center mt-14">
+          <a href="#contact" className="btn-primary-lg inline-block">
+            <span className="relative z-10 inline-flex items-center gap-2">
+              Start Risk-Free
+              <ArrowRight className="w-5 h-5" />
+            </span>
+          </a>
+          <p className="text-[13px] text-gray-500 mt-3 tracking-wide">
+            No contracts. Cancel anytime.
+          </p>
+        </div>
       </div>
+
+      {/* ── Idle animation styles ──────────────────────────────── */}
+      <style jsx>{`
+        .g-card-idle {
+          animation: g-float 5s ease-in-out infinite;
+        }
+        @keyframes g-float {
+          0%,
+          100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-3px);
+          }
+        }
+        .g-accent-shimmer {
+          background-size: 100% 200%;
+          animation: g-shimmer 3.5s ease-in-out infinite;
+        }
+        @keyframes g-shimmer {
+          0%,
+          100% {
+            background-position: 0% 0%;
+          }
+          50% {
+            background-position: 0% 100%;
+          }
+        }
+        @media (max-width: 1023px) {
+          .g-card-idle {
+            animation-duration: 6s;
+          }
+          @keyframes g-float {
+            0%,
+            100% {
+              transform: translateY(0px);
+            }
+            50% {
+              transform: translateY(-2px);
+            }
+          }
+        }
+      `}</style>
     </section>
   );
 }
