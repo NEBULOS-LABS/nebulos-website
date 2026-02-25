@@ -26,6 +26,11 @@ export default function KprTransition() {
 
     // ── CARD 1 (Problem) ─────────────────────────────────────────────
 
+    // Lock the initial visual state so the card never flashes at full width.
+    // ScrollTrigger auto-disables immediateRender when the trigger hasn't
+    // been reached, so gsap.set() fills the gap until the entry scrub activates.
+    gsap.set(card1Ref.current, { scale: 0.9, borderRadius: PEAK.radius });
+
     // Entry: scales up from 0.9 → 1.0 as the section scrolls into view
     gsap.fromTo(card1Ref.current,
       { scale: 0.9, borderRadius: PEAK.radius },
@@ -43,9 +48,12 @@ export default function KprTransition() {
     );
 
     // Pinned ramp: scroll freezes, card gradually tilts from flat to ramp angle.
-    // fromTo with immediateRender: false prevents competing with the entry animation.
+    // FROM vars intentionally omit scale/borderRadius — those are inherited from
+    // the completed entry animation. Including them here would cause the pin's
+    // internal layout measurement to render FROM values (scale:1) immediately,
+    // overriding the entry animation's in-progress state and producing a flash.
     gsap.fromTo(card1Ref.current,
-      { scale: 1, borderRadius: FLAT_RADIUS, rotateX: 0, y: 0, transformPerspective: PERSPECTIVE },
+      { rotateX: 0, y: 0, transformPerspective: PERSPECTIVE },
       {
         scale: RAMP.scale,
         borderRadius: RAMP.radius,
@@ -109,8 +117,9 @@ export default function KprTransition() {
     );
 
     // Pinned flatten: scroll freezes, card settles from ramp angle to flat.
+    // FROM vars intentionally omit scale/borderRadius — inherited from entry.
     gsap.fromTo(card2Ref.current,
-      { scale: RAMP.scale, borderRadius: RAMP.radius, rotateX: RAMP.angle, transformPerspective: PERSPECTIVE },
+      { rotateX: RAMP.angle, transformPerspective: PERSPECTIVE },
       {
         scale: 1,
         borderRadius: FLAT_RADIUS,
@@ -140,6 +149,7 @@ export default function KprTransition() {
       <div ref={card1WrapperRef} className="relative w-full z-10 -mt-16 -mb-40">
         <div
           className="relative w-full overflow-hidden origin-bottom border-x border-b border-white/[0.1] shadow-[0_20px_50px_rgba(0,0,0,0.5),0_30px_60px_-15px_rgba(0,238,255,0.08),0_30px_60px_-15px_rgba(153,0,255,0.08),20px_0_40px_-12px_rgba(255,255,255,0.04),-20px_0_40px_-12px_rgba(255,255,255,0.04),0_4px_20px_-4px_rgba(255,255,255,0.12)] transform-gpu z-10"
+          style={{ transform: 'scale(0.9)', borderRadius: '64px' }}
           ref={card1Ref}
         >
           <GlassFlow />
