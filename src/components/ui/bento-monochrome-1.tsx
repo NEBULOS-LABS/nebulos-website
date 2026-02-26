@@ -8,6 +8,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { staggerContainer } from "@/lib/animations";
 import { Layers, Code2, Brain, Server } from "lucide-react";
+import AccretionBackground from "@/components/accretion-bg";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -129,220 +130,6 @@ const KEYFRAME_CSS = [
   ".svc-panel:focus-visible{outline:2px solid #00eeff;outline-offset:2px;border-radius:20px}",
   "@keyframes progressGlow{0%,100%{box-shadow:0 0 8px rgba(0,238,255,0.2)}50%{box-shadow:0 0 20px rgba(0,238,255,0.4),0 0 6px rgba(255,0,255,0.15)}}",
 ].join("\n");
-
-/* ─────────────── Liquid Canvas (Paper.js) ─────────────── */
-
-interface BlobConfig {
-  x: number;
-  y: number;
-  radius: number;
-  color: string;
-  noiseSpeed: number;
-  noiseAmp: number;
-}
-
-const BLOB_CONFIGS: BlobConfig[] = [
-  { x: 0.15, y: 0.2,  radius: 180, color: "rgba(153,0,255,0.4)",  noiseSpeed: 0.4, noiseAmp: 30 },
-  { x: 0.7,  y: 0.35, radius: 170, color: "rgba(0,238,255,0.35)", noiseSpeed: 0.35, noiseAmp: 28 },
-  { x: 0.4,  y: 0.15, radius: 160, color: "rgba(255,0,255,0.35)", noiseSpeed: 0.45, noiseAmp: 25 },
-  { x: 0.2,  y: 0.65, radius: 140, color: "rgba(153,0,255,0.3)",  noiseSpeed: 0.3, noiseAmp: 22 },
-  { x: 0.75, y: 0.7,  radius: 130, color: "rgba(0,238,255,0.25)", noiseSpeed: 0.38, noiseAmp: 20 },
-];
-
-const SEGMENTS = 8;
-const CURSOR_RADIUS = 200;
-const CURSOR_FORCE = 8000;
-const LERP_FACTOR = 0.08;
-
-const LiquidCanvas = React.memo(function LiquidCanvas({
-  reducedMotion,
-  isMobile,
-  intensityRef,
-}: {
-  reducedMotion: boolean;
-  isMobile: boolean;
-  intensityRef?: React.RefObject<number>;
-}) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const paperScopeRef = useRef<any>(null);
-  const mousePos = useRef({ x: -9999, y: -9999 });
-  const lastFrameTime = useRef(0);
-  const reducedMotionRef = useRef(reducedMotion);
-  const isMobileRef = useRef(isMobile);
-
-  // Keep refs in sync without tearing down Paper.js
-  useEffect(() => { reducedMotionRef.current = reducedMotion; }, [reducedMotion]);
-  useEffect(() => { isMobileRef.current = isMobile; }, [isMobile]);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    let destroyed = false;
-    let resizeHandler: (() => void) | null = null;
-    let resizeCleanup: (() => void) | null = null;
-
-    (async () => {
-      // Use paper-core (excludes PaperScript/Acorn) to avoid
-      // dev-mode `global.acorn` resolution failure in webpack.
-      const paperModule = await import(
-        /* webpackChunkName: "paper" */ "paper/dist/paper-core.js"
-      );
-      const paper = (paperModule.default ?? paperModule) as typeof import("paper");
-
-      if (destroyed) return;
-
-      const scope = new paper.PaperScope();
-      scope.setup(canvas);
-      paperScopeRef.current = scope;
-
-      const paths: paper.Path[] = [];
-
-      BLOB_CONFIGS.forEach((cfg) => {
-        const center = new scope.Point(
-          canvas.width * cfg.x,
-          canvas.height * cfg.y
-        );
-
-        const path = new scope.Path();
-        path.closed = true;
-        path.fillColor = new scope.Color(cfg.color);
-
-        for (let i = 0; i < SEGMENTS; i++) {
-          const angle = (i / SEGMENTS) * Math.PI * 2;
-          const px = center.x + Math.cos(angle) * cfg.radius;
-          const py = center.y + Math.sin(angle) * cfg.radius;
-          path.add(new scope.Point(px, py));
-        }
-        path.smooth({ type: "continuous" });
-        paths.push(path);
-      });
-
-      // Store original positions for noise reference
-      const originals = paths.map((p) =>
-        p.segments.map((s) => ({ x: s.point.x, y: s.point.y }))
-      );
-
-      // Animation loop — time-based 30fps cap (works on 60/120/144Hz)
-      const FRAME_INTERVAL = 1 / 30;
-
-      scope.view.onFrame = (event: { count: number; time: number }) => {
-        if (event.time - lastFrameTime.current < FRAME_INTERVAL) return;
-        lastFrameTime.current = event.time;
-
-        const t = event.time;
-        const rm = reducedMotionRef.current;
-        const mob = isMobileRef.current;
-
-        paths.forEach((path, bi) => {
-          const cfg = BLOB_CONFIGS[bi];
-          const orig = originals[bi];
-          const intensity = intensityRef?.current ?? 1;
-          const speed = rm ? 0 : (mob ? cfg.noiseSpeed * 0.3 : cfg.noiseSpeed) * intensity;
-          const amp = rm ? 0 : cfg.noiseAmp * intensity;
-
-          path.segments.forEach((seg, si) => {
-            const o = orig[si];
-
-            // Layered sin composition for organic noise
-            const n1 = Math.sin(t * speed + si * 1.7 + bi * 2.3) * amp;
-            const n2 = Math.sin(t * speed * 0.7 + si * 2.9 + bi * 1.1) * amp * 0.5;
-            const n3 = Math.cos(t * speed * 1.3 + si * 0.8 + bi * 3.7) * amp * 0.3;
-
-            let targetX = o.x + n1 + n3;
-            let targetY = o.y + n2 + n3;
-
-            // Cursor magnetic repulsion (desktop only)
-            if (!mob && !rm) {
-              const mx = mousePos.current.x;
-              const my = mousePos.current.y;
-              const dx = targetX - mx;
-              const dy = targetY - my;
-              const dist = Math.sqrt(dx * dx + dy * dy);
-
-              if (dist < CURSOR_RADIUS && dist > 1) {
-                const force = CURSOR_FORCE / (dist * dist);
-                targetX += (dx / dist) * force;
-                targetY += (dy / dist) * force;
-              }
-            }
-
-            // Lerp for smooth thick-liquid motion
-            seg.point.x += (targetX - seg.point.x) * LERP_FACTOR;
-            seg.point.y += (targetY - seg.point.y) * LERP_FACTOR;
-          });
-
-          path.smooth({ type: "continuous" });
-        });
-      };
-
-      // Resize handler
-      resizeHandler = () => {
-        if (!canvas || destroyed) return;
-        const rect = canvas.parentElement?.getBoundingClientRect();
-        if (!rect) return;
-        scope.view.viewSize = new scope.Size(rect.width, rect.height);
-
-        paths.forEach((path, bi) => {
-          const cfg = BLOB_CONFIGS[bi];
-          const newCenter = new scope.Point(rect.width * cfg.x, rect.height * cfg.y);
-          const oldCenter = path.bounds.center;
-          const delta = newCenter.subtract(oldCenter);
-          path.translate(delta);
-          originals[bi] = path.segments.map((s) => ({ x: s.point.x, y: s.point.y }));
-        });
-      };
-
-      let resizeTimer: ReturnType<typeof setTimeout>;
-      const debouncedResize = () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => { if (resizeHandler) resizeHandler(); }, 150);
-      };
-      window.addEventListener("resize", debouncedResize);
-
-      // Store debounced handler for cleanup
-      resizeCleanup = () => {
-        clearTimeout(resizeTimer);
-        window.removeEventListener("resize", debouncedResize);
-      };
-    })();
-
-    // Mouse tracking on the canvas
-    const handleMouse = (e: MouseEvent) => {
-      if (isMobileRef.current) return;
-      const rect = canvas.getBoundingClientRect();
-      mousePos.current = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-      };
-    };
-    canvas.addEventListener("mousemove", handleMouse);
-
-    return () => {
-      destroyed = true;
-      canvas.removeEventListener("mousemove", handleMouse);
-      if (resizeCleanup) resizeCleanup();
-      if (paperScopeRef.current) {
-        // scope.remove() calls clear() internally, removing all projects and views
-        paperScopeRef.current.remove();
-        paperScopeRef.current = null;
-      }
-    };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-auto"
-      style={{
-        filter: "blur(40px)",
-        mixBlendMode: "screen",
-        willChange: "transform",
-      }}
-      data-paper-resize="true"
-    />
-  );
-});
 
 /* ─────────────── Micro-Animated Visuals (Memoized) ─────────────── */
 
@@ -931,7 +718,6 @@ export function Bento3Section() {
   const cardsContainerRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const railFillRef = useRef<HTMLDivElement>(null);
-  const canvasIntensityRef = useRef(1);
   const cursorDotRef = useRef<HTMLDivElement>(null);
   const cursorRingRef = useRef<HTMLDivElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
@@ -991,7 +777,7 @@ export function Bento3Section() {
     { scope: sectionRef, dependencies: [isMobile, reducedMotion] }
   );
 
-  /* Continuous scroll progress — drives rail fill + canvas intensity */
+  /* Continuous scroll progress — drives rail fill */
   useGSAP(
     () => {
       if (!cardsContainerRef.current || isMobile || reducedMotion) return;
@@ -1003,7 +789,6 @@ export function Bento3Section() {
           if (railFillRef.current) {
             railFillRef.current.style.height = `${self.progress * 100}%`;
           }
-          canvasIntensityRef.current = 1 + self.progress * 0.4;
         },
       });
     },
@@ -1451,9 +1236,9 @@ export function Bento3Section() {
 
   return (
     <div ref={outerRef} className="relative w-full bg-black text-gray-300" id="services">
-      {/* Liquid nebula canvas background */}
+      {/* Accretion disk background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <LiquidCanvas reducedMotion={reducedMotion} isMobile={isMobile} intensityRef={canvasIntensityRef} />
+        <AccretionBackground reducedMotion={reducedMotion} />
       </div>
 
       {/* Noise grain overlay */}
@@ -1470,6 +1255,14 @@ export function Bento3Section() {
       <div
         className="absolute inset-0 pointer-events-none z-[2]"
         style={{ background: "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.35) 100%)" }}
+      />
+
+      {/* Directional fade — darker on right for card readability */}
+      <div
+        className="absolute inset-0 pointer-events-none z-[2]"
+        style={{
+          background: "linear-gradient(to right, transparent 0%, transparent 30%, rgba(0,0,0,0.25) 60%, rgba(0,0,0,0.45) 100%)",
+        }}
       />
 
       {/* ═══ SECTION WATERMARK ═══ */}
