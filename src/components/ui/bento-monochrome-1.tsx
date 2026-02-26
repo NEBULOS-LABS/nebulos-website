@@ -778,6 +778,8 @@ export function Bento3Section() {
   const dissolveSentinelRef = useRef<HTMLDivElement>(null);
   const diskOffsetYRef = useRef(0.35);
   const depthProxyRef = useRef({ y: 0.35, dustOpacity: 0, hazeOpacity: 0, pointerInfluence: 0 });
+  const diskMouseRef = useRef({ nx: 0, ny: 0, prox: 0 });
+  const enableLensing = useRef(true);
   const { pointerRef, isInsideRef } = usePointerParallax(outerRef, !isMobile && !reducedMotion);
   const bgInnerRef = useRef<HTMLDivElement>(null);
   const hazeRef = useRef<HTMLDivElement>(null);
@@ -1318,6 +1320,11 @@ export function Bento3Section() {
     const headerEl = headerRef.current;
     if (!bgInner) return;
 
+    // Disable lensing on low-end devices
+    if (typeof navigator !== "undefined" && navigator.hardwareConcurrency <= 4) {
+      enableLensing.current = false;
+    }
+
     // Far plane: heavy damping (1.2s) — the background feels massive
     const bgX = gsap.quickTo(bgInner, "x", { duration: 1.2, ease: "power2.out" });
     const bgY = gsap.quickTo(bgInner, "y", { duration: 1.2, ease: "power2.out" });
@@ -1354,6 +1361,18 @@ export function Bento3Section() {
         haze.style.opacity = `${depthProxyRef.current.hazeOpacity}`;
       }
 
+      // Lensing proximity: distance from pointer to black hole center (lower-right)
+      const bhCenterX = 0.5;
+      const bhCenterY = 0.4;
+      const dx = nx - bhCenterX;
+      const dy = ny - bhCenterY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const prox = enableLensing.current
+        ? Math.max(0, 1 - dist / 0.8) * influence
+        : 0;
+
+      diskMouseRef.current = { nx: nx * influence, ny: ny * influence, prox };
+
       rafId = requestAnimationFrame(tick);
     };
 
@@ -1377,7 +1396,7 @@ export function Bento3Section() {
       {/* Background layers — sticky on desktop (parallax), absolute on mobile */}
       <div className={`${isMobile ? 'absolute inset-0' : 'sticky top-0 h-screen w-full'} overflow-hidden pointer-events-none z-0`}>
         <div ref={bgInnerRef} className="absolute inset-0" style={{ willChange: isMobile ? 'auto' : 'transform' }}>
-          <AccretionBackground reducedMotion={reducedMotion} offsetYRef={diskOffsetYRef} />
+          <AccretionBackground reducedMotion={reducedMotion} offsetYRef={diskOffsetYRef} mouseRef={diskMouseRef} />
 
           {/* Noise grain overlay */}
           <div className="absolute inset-0 pointer-events-none z-[1]" style={{ opacity: 0.03, mixBlendMode: "overlay" }}>

@@ -23,6 +23,8 @@ uniform float u_speed;
 uniform float u_turbulence;
 uniform float u_depth;
 uniform vec2  u_offset;
+uniform vec2  u_mouse;
+uniform float u_mouse_prox;
 
 /* ── Brand Palette ───────────────────────────────────────────────────── */
 
@@ -56,7 +58,8 @@ void main() {
   float d = 0.0;
   float z = 0.0;
 
-  vec2 offset = u_offset * uResolution;
+  vec2 lensShift = u_mouse * u_mouse_prox * 0.02;
+  vec2 offset = (u_offset + lensShift) * uResolution;
 
   for (float i = 0.0; i < 20.0; i++) {
     vec3 p = z * normalize(vec3(I + I - uResolution.xy + offset, -uResolution.x)) + 0.1 * u_depth;
@@ -96,6 +99,8 @@ uniform float u_speed;
 uniform float u_turbulence;
 uniform float u_depth;
 uniform vec2  u_offset;
+uniform vec2  u_mouse;
+uniform float u_mouse_prox;
 
 vec3 brandPalette(float t) {
   vec3 cyan    = vec3(0.0, 0.933, 1.0);
@@ -122,7 +127,8 @@ void main() {
   float d = 0.0;
   float z = 0.0;
 
-  vec2 offset = u_offset * uResolution;
+  vec2 lensShift = u_mouse * u_mouse_prox * 0.02;
+  vec2 offset = (u_offset + lensShift) * uResolution;
 
   for (float i = 0.0; i < 20.0; i++) {
     vec3 p = z * normalize(vec3(I + I - uResolution.xy + offset, -uResolution.x)) + 0.1 * u_depth;
@@ -210,16 +216,20 @@ interface AccretionBackgroundProps {
   className?: string;
   reducedMotion?: boolean;
   offsetYRef?: React.MutableRefObject<number>;
+  mouseRef?: React.MutableRefObject<{ nx: number; ny: number; prox: number }>;
 }
 
 export default function AccretionBackground({
   className,
   reducedMotion,
   offsetYRef: externalOffsetYRef,
+  mouseRef: externalMouseRef,
 }: AccretionBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const internalOffsetYRef = useRef(OFFSET_Y);
   const activeOffsetYRef = externalOffsetYRef ?? internalOffsetYRef;
+  const internalMouseRef = useRef({ nx: 0, ny: 0, prox: 0 });
+  const activeMouseRef = externalMouseRef ?? internalMouseRef;
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   // All mutable animation / state refs (no React state to avoid re-renders)
@@ -344,6 +354,8 @@ export default function AccretionBackground({
       u_turbulence: gl.getUniformLocation(program, "u_turbulence"),
       u_depth: gl.getUniformLocation(program, "u_depth"),
       u_offset: gl.getUniformLocation(program, "u_offset"),
+      u_mouse: gl.getUniformLocation(program, "u_mouse"),
+      u_mouse_prox: gl.getUniformLocation(program, "u_mouse_prox"),
     };
 
     // Initial sizing
@@ -378,6 +390,9 @@ export default function AccretionBackground({
     gl.uniform1f(u.u_turbulence, TURBULENCE);
     gl.uniform1f(u.u_depth, DEPTH);
     gl.uniform2f(u.u_offset, OFFSET_X, activeOffsetYRef.current);
+    const mouse = activeMouseRef.current;
+    gl.uniform2f(u.u_mouse, mouse.nx, mouse.ny);
+    gl.uniform1f(u.u_mouse_prox, mouse.prox);
 
     // Draw fullscreen quad
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -433,6 +448,8 @@ export default function AccretionBackground({
           gl.uniform1f(u.u_turbulence, TURBULENCE);
           gl.uniform1f(u.u_depth, DEPTH);
           gl.uniform2f(u.u_offset, OFFSET_X, activeOffsetYRef.current);
+          gl.uniform2f(u.u_mouse, 0, 0);
+          gl.uniform1f(u.u_mouse_prox, 0);
           gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
         }
       } else {
