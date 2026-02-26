@@ -937,6 +937,7 @@ export function Bento3Section() {
   const outerRef = useRef<HTMLDivElement>(null);
   const cardNaturalHeights = useRef<number[]>([]);
   const virtualTriggerRef = useRef<HTMLDivElement>(null);
+  const dissolveSentinelRef = useRef<HTMLDivElement>(null);
 
   /* Keyframe injection */
   useEffect(() => {
@@ -1306,31 +1307,63 @@ export function Bento3Section() {
         });
       });
 
-      /* Section boundary — hide pinned bars when user scrolls past services.
-         Without this, position:fixed bars bleed over guarantee/FAQ/footer.
-         "bottom bottom" = onLeave fires when services bottom reaches viewport
-         bottom, exactly when the next section first enters view. */
-      ScrollTrigger.create({
-        trigger: outerRef.current,
-        start: "top top",
-        end: "bottom bottom",
-        onLeave: () => {
-          pinnedCards.forEach((idx) => {
-            const w = cardRefs.current[idx];
-            const c = w?.querySelector(".svc-panel") as HTMLElement;
-            // display:none hides the entire subtree unconditionally —
-            // unlike visibility:hidden, children cannot override it.
-            if (c) { c.style.display = "none"; }
-          });
-        },
-        onEnterBack: () => {
-          pinnedCards.forEach((idx) => {
-            const w = cardRefs.current[idx];
-            const c = w?.querySelector(".svc-panel") as HTMLElement;
-            if (c) { c.style.display = ""; }
-          });
-        },
-      });
+      /* Section exit: staggered dissolve of compressed bars.
+         Uses dissolveSentinelRef (a 150px marker AFTER the footer) as the
+         trigger instead of outerRef — outerRef's bottom shifts dynamically
+         as cards pin/unpin (position:fixed changes document flow), causing
+         stale trigger positions and progress miscalculation on reverse scroll.
+
+         Uses direct style.opacity (not GSAP tweens) because the entrance
+         animations (gsap.to + scrollTrigger scrub) create perpetually-active
+         tweens on .svc-panel opacity/transform. GSAP tween conflicts cause
+         dissolve to silently fail on the last card. Direct style manipulation
+         bypasses GSAP's overwrite mechanism entirely.
+
+         Targets the WRAPPER elements (cardRefs), NOT .svc-panel, because
+         the entrance animations (gsap.to + scrollTrigger scrub) maintain
+         perpetual GSAP tweens on .svc-panel opacity. GSAP scrub tweens
+         re-assert their values every render tick, overwriting any direct
+         style.opacity changes. By dissolving the WRAPPER instead, opacity
+         cascades visually to .svc-panel children without property conflict.
+
+         Only opacity + visibility are animated (no transform). */
+      const sentinel = dissolveSentinelRef.current;
+      if (sentinel) {
+        ScrollTrigger.create({
+          trigger: sentinel,
+          start: "top bottom",       // sentinel top hits viewport bottom
+          end: "bottom bottom",      // sentinel bottom hits viewport bottom
+          onUpdate: (self) => {
+            const p = self.progress;
+            const stagger = 0.08;
+            const duration = 1 - (SERVICES.length - 1) * stagger;
+            cardRefs.current.forEach((w, idx) => {
+              if (!w) return;
+              const barP = Math.max(0, Math.min(1, (p - idx * stagger) / duration));
+              w.style.opacity = `${1 - barP}`;
+            });
+          },
+          onLeave: () => {
+            cardRefs.current.forEach((w) => {
+              if (!w) return;
+              w.style.opacity = "0";
+              w.style.visibility = "hidden";
+            });
+          },
+          onEnterBack: () => {
+            cardRefs.current.forEach((w) => {
+              if (!w) return;
+              w.style.visibility = "";
+            });
+          },
+          onLeaveBack: () => {
+            cardRefs.current.forEach((w) => {
+              if (!w) return;
+              w.style.opacity = "1";
+            });
+          },
+        });
+      }
 
       return () => {
         window.removeEventListener("resize", handleResize);
@@ -1498,7 +1531,7 @@ export function Bento3Section() {
         </div>
 
         {/* ═══ 2-COLUMN LAYOUT (desktop) / Single column (mobile) ═══ */}
-        <div className="md:grid md:grid-cols-[minmax(220px,0.8fr)_minmax(0,4fr)] md:gap-10 lg:gap-14">
+        <div className="md:grid md:grid-cols-[minmax(280px,1.5fr)_minmax(0,3fr)] md:gap-16 lg:gap-20">
 
           {/* ═══ LEFT COLUMN — Sticky narrative anchor (left-justified) ═══ */}
           <div
@@ -1594,6 +1627,14 @@ export function Bento3Section() {
             </a>
           </div>
         </div>
+      {/* Dissolve sentinel — fixed-height marker whose position is NOT
+          affected by card pinning (cards pin above this in the DOM flow).
+          The dissolve timeline triggers off this element's top/bottom
+          crossing the viewport, giving stable trigger positions. */}
+      {!isMobile && (
+        <div ref={dissolveSentinelRef} aria-hidden="true"
+          style={{ height: 150, pointerEvents: "none" }} />
+      )}
       </motion.section>
 
       {/* ═══ CUSTOM CURSOR — dot + ring, section-scoped ═══ */}
