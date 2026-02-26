@@ -10,6 +10,7 @@ import { staggerContainer } from "@/lib/animations";
 import { Layers, Code2, Brain, Server } from "lucide-react";
 import AccretionBackground from "@/components/accretion-bg";
 import { usePointerParallax } from "@/hooks/use-pointer-parallax";
+import DustField from "@/components/dust-field";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -130,6 +131,7 @@ const KEYFRAME_CSS = [
   "@keyframes mobileReveal{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}",
   ".svc-panel:focus-visible{outline:2px solid #00eeff;outline-offset:2px;border-radius:20px}",
   "@keyframes progressGlow{0%,100%{box-shadow:0 0 8px rgba(0,238,255,0.2)}50%{box-shadow:0 0 20px rgba(0,238,255,0.4),0 0 6px rgba(255,0,255,0.15)}}",
+  "@keyframes hazeRotate{0%{transform:rotate(0deg) scale(1.2)}100%{transform:rotate(360deg) scale(1.2)}}",
 ].join("\n");
 
 /* ─────────────── Micro-Animated Visuals (Memoized) ─────────────── */
@@ -778,6 +780,7 @@ export function Bento3Section() {
   const depthProxyRef = useRef({ y: 0.35, dustOpacity: 0, hazeOpacity: 0, pointerInfluence: 0 });
   const { pointerRef, isInsideRef } = usePointerParallax(outerRef, !isMobile && !reducedMotion);
   const bgInnerRef = useRef<HTMLDivElement>(null);
+  const hazeRef = useRef<HTMLDivElement>(null);
 
   /* Keyframe injection */
   useEffect(() => {
@@ -1345,6 +1348,12 @@ export function Bento3Section() {
         headY(ny * 3 * influence);
       }
 
+      // Haze opacity sync
+      const haze = hazeRef.current;
+      if (haze) {
+        haze.style.opacity = `${depthProxyRef.current.hazeOpacity}`;
+      }
+
       rafId = requestAnimationFrame(tick);
     };
 
@@ -1393,12 +1402,41 @@ export function Bento3Section() {
               background: "linear-gradient(to right, transparent 0%, transparent 30%, rgba(0,0,0,0.25) 60%, rgba(0,0,0,0.45) 100%)",
             }}
           />
+
+          {/* Volumetric haze — slow-rotating light scatter, biased lower-right */}
+          {!isMobile && (
+            <div
+              ref={hazeRef}
+              className="absolute inset-0 pointer-events-none z-[5]"
+              style={{
+                background: `
+                  radial-gradient(ellipse at 70% 65%, rgba(0, 238, 255, 0.08) 0%, transparent 50%),
+                  conic-gradient(from 0deg at 65% 60%, rgba(153, 0, 255, 0.04) 0deg, transparent 90deg, rgba(0, 238, 255, 0.03) 180deg, transparent 270deg)
+                `,
+                mixBlendMode: "screen",
+                opacity: 0,
+                animation: "hazeRotate 90s linear infinite",
+                willChange: "transform",
+              }}
+            />
+          )}
         </div>
       </div>
 
       {/* Separator accent lines */}
       <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#9900ff]/60 to-transparent z-[3]" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-[2px] bg-gradient-to-r from-transparent via-[#00eeff]/80 to-transparent shadow-[0_0_25px_rgba(0,238,255,1)] z-[3]" />
+
+      {/* Dust motes — near plane, additive blend overlay */}
+      {!isMobile && (
+        <div className="absolute inset-0 pointer-events-none z-[15]">
+          <DustField
+            pointerRef={pointerRef}
+            depthProxyRef={depthProxyRef}
+            enabled={!isMobile && !reducedMotion}
+          />
+        </div>
+      )}
 
       {/* ═══ SCROLL RAIL — absolute far-left, outside grid ═══ */}
       {!isMobile && (
