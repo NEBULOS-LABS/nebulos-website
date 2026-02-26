@@ -1265,20 +1265,6 @@ export function Bento3Section() {
         }}
       />
 
-      {/* ═══ SECTION WATERMARK ═══ */}
-      <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none z-[1]"
-        style={{
-          fontSize: "clamp(120px, 15vw, 220px)",
-          fontWeight: 800,
-          letterSpacing: "0.05em",
-          color: "rgba(255,255,255,0.02)",
-          whiteSpace: "nowrap",
-        }}
-      >
-        SERVICES
-      </div>
-
       {/* Separator accent lines */}
       <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#9900ff]/60 to-transparent z-[3]" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-[2px] bg-gradient-to-r from-transparent via-[#00eeff]/80 to-transparent shadow-[0_0_25px_rgba(0,238,255,1)] z-[3]" />
