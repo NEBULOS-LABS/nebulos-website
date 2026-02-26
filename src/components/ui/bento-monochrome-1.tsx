@@ -1341,6 +1341,11 @@ export function Bento3Section() {
     let rafId = 0;
 
     const tick = () => {
+      // When pointer leaves section, ease normalized coords toward center
+      if (!isInsideRef.current) {
+        pointerRef.current.nx += (0 - pointerRef.current.nx) * 0.03;
+        pointerRef.current.ny += (0 - pointerRef.current.ny) * 0.03;
+      }
       const { nx, ny } = pointerRef.current;
       const influence = depthProxyRef.current.pointerInfluence;
 
