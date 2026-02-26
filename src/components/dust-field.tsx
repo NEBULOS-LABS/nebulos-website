@@ -28,7 +28,7 @@ interface DustFieldProps {
 
 const BASE_COUNT = 80;
 const LOW_END_COUNT = 40;
-const NEAR_PLANE_PARALLAX = 45;
+const NEAR_PLANE_PARALLAX = 55;
 
 /* ─── Component ─────────────────────────────────────────────────────── */
 

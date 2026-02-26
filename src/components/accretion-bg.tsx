@@ -58,7 +58,7 @@ void main() {
   float d = 0.0;
   float z = 0.0;
 
-  vec2 lensShift = u_mouse * u_mouse_prox * 0.02;
+  vec2 lensShift = u_mouse * u_mouse_prox * 0.025;
   vec2 offset = (u_offset + lensShift) * uResolution;
 
   for (float i = 0.0; i < 20.0; i++) {
@@ -127,7 +127,7 @@ void main() {
   float d = 0.0;
   float z = 0.0;
 
-  vec2 lensShift = u_mouse * u_mouse_prox * 0.02;
+  vec2 lensShift = u_mouse * u_mouse_prox * 0.025;
   vec2 offset = (u_offset + lensShift) * uResolution;
 
   for (float i = 0.0; i < 20.0; i++) {

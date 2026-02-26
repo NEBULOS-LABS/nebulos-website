@@ -439,13 +439,22 @@ function StackCard({
       const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       const ny = ((e.clientY - rect.top) / rect.height) * 2 - 1;
 
-      // Perspective tilt: rotateY follows X, rotateX follows -Y (natural tilt)
-      card.style.transform = `perspective(1200px) rotateY(${nx * 1.2}deg) rotateX(${-ny * 0.8}deg) translateZ(16px)`;
+      // Perspective tilt: slightly more aggressive for physicality
+      card.style.transform = `perspective(1200px) rotateY(${nx * 1.5}deg) rotateX(${-ny * 1.0}deg) translateZ(20px)`;
 
-      // Specular highlight position
+      // Accent aura position (cyan-tinted, not white)
       card.style.setProperty("--spec-x", `${50 + nx * 20}%`);
       card.style.setProperty("--spec-y", `${50 + ny * 20}%`);
-      card.style.setProperty("--spec-opacity", "0.12");
+      card.style.setProperty("--spec-opacity", "0.035");
+
+      // Directional shadow + inner glow (light from accretion disk)
+      card.style.boxShadow = `inset 0 1px 0 rgba(255,255,255,0.12), inset ${nx * 2}px ${ny * 1.5}px 25px rgba(0,238,255,0.05), 0 12px 48px ${service.accent}18, ${-nx * 6}px ${-ny * 4}px 40px rgba(0,0,0,0.35)`;
+
+      // Border glow — accent-colored directional light
+      card.style.borderColor = `rgba(0, 238, 255, 0.18)`;
+
+      // Content luminance boost
+      card.style.setProperty("--card-brightness", "1.12");
     };
 
     const onLeave = () => {
@@ -460,6 +469,9 @@ function StackCard({
         clearProps: "transform",
       });
       card.style.setProperty("--spec-opacity", "0");
+      card.style.setProperty("--card-brightness", "1");
+      card.style.boxShadow = "";
+      card.style.borderColor = "";
     };
 
     card.addEventListener("mousemove", onMove);
@@ -509,7 +521,7 @@ function StackCard({
           ref={specularRef}
           className="absolute inset-0 z-[30] pointer-events-none rounded-[inherit]"
           style={{
-            background: `radial-gradient(ellipse at var(--spec-x, 50%) var(--spec-y, 50%), rgba(255,255,255,var(--spec-opacity, 0)) 0%, transparent 60%)`,
+            background: `radial-gradient(ellipse at var(--spec-x, 50%) var(--spec-y, 50%), rgba(0,238,255,var(--spec-opacity, 0)) 0%, transparent 65%)`,
             transition: "opacity 300ms ease",
           }}
         />
@@ -649,7 +661,7 @@ function StackCard({
 
       {/* ═══ DESKTOP CONTENT ═══ */}
       {!isMobile && (
-        <div ref={desktopContentRef} data-desktop-content className="relative z-10 flex flex-col h-full" style={{ padding: "clamp(1.5rem, 3vw, 2.5rem)" }}>
+        <div ref={desktopContentRef} data-desktop-content className="relative z-10 flex flex-col h-full" style={{ padding: "clamp(1.5rem, 3vw, 2.5rem)", filter: "brightness(var(--card-brightness, 1))", transition: "filter 400ms ease" }}>
           {/* Icon badge — top right */}
           {IconComp && (
             <div
@@ -997,8 +1009,8 @@ export function Bento3Section() {
       gsap.to(proxy, {
         keyframes: {
           "0%":   { y: 0.35, dustOpacity: 0,    hazeOpacity: 0,    pointerInfluence: 0 },
-          "15%":  { y: 0.10, dustOpacity: 0.65,  hazeOpacity: 0.06, pointerInfluence: 1 },
-          "85%":  { y: 0.10, dustOpacity: 0.65,  hazeOpacity: 0.06, pointerInfluence: 1 },
+          "15%":  { y: 0.10, dustOpacity: 0.65,  hazeOpacity: 0.16, pointerInfluence: 1 },
+          "85%":  { y: 0.10, dustOpacity: 0.65,  hazeOpacity: 0.16, pointerInfluence: 1 },
           "100%": { y: -0.20, dustOpacity: 0,    hazeOpacity: 0,    pointerInfluence: 0 },
         },
         ease: "none",
@@ -1326,6 +1338,8 @@ export function Bento3Section() {
 
     const bgInner = bgInnerRef.current;
     const headerEl = headerRef.current;
+    const hazeEl = hazeRef.current;
+    const outer = outerRef.current;
     if (!bgInner) return;
 
     // Disable lensing on low-end devices
@@ -1338,12 +1352,20 @@ export function Bento3Section() {
     const bgY = gsap.quickTo(bgInner, "y", { duration: 1.2, ease: "power2.out" });
     const bgRotate = gsap.quickTo(bgInner, "rotation", { duration: 1.4, ease: "power2.out" });
 
-    // Headline: very light response (0.8s)
+    // Haze: mid-far plane (1.1s) — floats between bg and content
+    let hazeX: gsap.QuickToFunc | null = null;
+    let hazeY: gsap.QuickToFunc | null = null;
+    if (hazeEl) {
+      hazeX = gsap.quickTo(hazeEl, "x", { duration: 1.1, ease: "power2.out" });
+      hazeY = gsap.quickTo(hazeEl, "y", { duration: 1.1, ease: "power2.out" });
+    }
+
+    // Headline: mid-near response (0.6s)
     let headX: gsap.QuickToFunc | null = null;
     let headY: gsap.QuickToFunc | null = null;
     if (headerEl) {
-      headX = gsap.quickTo(headerEl, "x", { duration: 0.8, ease: "power2.out" });
-      headY = gsap.quickTo(headerEl, "y", { duration: 0.8, ease: "power2.out" });
+      headX = gsap.quickTo(headerEl, "x", { duration: 0.6, ease: "power2.out" });
+      headY = gsap.quickTo(headerEl, "y", { duration: 0.6, ease: "power2.out" });
     }
 
     let rafId = 0;
@@ -1363,18 +1385,30 @@ export function Bento3Section() {
       const { nx, ny } = pointerRef.current;
       const influence = depthProxyRef.current.pointerInfluence;
 
-      // Far plane: translate 24px x, 18px y, rotate 0.5deg
-      bgX(nx * 24 * influence);
-      bgY(ny * 18 * influence);
-      bgRotate(nx * 0.5 * influence);
+      // Far plane: translate ±32px x, ±24px y, rotate ±0.6deg
+      bgX(nx * 32 * influence);
+      bgY(ny * 24 * influence);
+      bgRotate(nx * 0.6 * influence);
 
-      // Headline: translate 4px max
-      if (headX && headY) {
-        headX(nx * 4 * influence);
-        headY(ny * 3 * influence);
+      // Haze: translate ±20px x, ±15px y (on outer wrapper, CSS anim on inner)
+      if (hazeX && hazeY) {
+        hazeX(nx * 20 * influence);
+        hazeY(ny * 15 * influence);
       }
 
-      // Haze opacity sync
+      // Headline: translate ±6px x, ±4px y
+      if (headX && headY) {
+        headX(nx * 6 * influence);
+        headY(ny * 4 * influence);
+      }
+
+      // Card content parallax via CSS custom properties (±10px x, ±7px y)
+      if (outer) {
+        outer.style.setProperty("--cpx", `${nx * 10 * influence}px`);
+        outer.style.setProperty("--cpy", `${ny * 7 * influence}px`);
+      }
+
+      // Haze opacity sync (set on outer wrapper, inner has CSS rotation)
       const haze = hazeRef.current;
       if (haze) {
         haze.style.opacity = `${depthProxyRef.current.hazeOpacity}`;
@@ -1441,22 +1475,25 @@ export function Bento3Section() {
             }}
           />
 
-          {/* Volumetric haze — slow-rotating light scatter, biased lower-right */}
+          {/* Volumetric haze — outer wrapper for GSAP parallax, inner for CSS rotation */}
           {!isMobile && (
             <div
               ref={hazeRef}
               className="absolute inset-0 pointer-events-none z-[5]"
-              style={{
-                background: `
-                  radial-gradient(ellipse at 70% 65%, rgba(0, 238, 255, 0.08) 0%, transparent 50%),
-                  conic-gradient(from 0deg at 65% 60%, rgba(153, 0, 255, 0.04) 0deg, transparent 90deg, rgba(0, 238, 255, 0.03) 180deg, transparent 270deg)
-                `,
-                mixBlendMode: "screen",
-                opacity: 0,
-                animation: "hazeRotate 90s linear infinite",
-                willChange: "transform",
-              }}
-            />
+              style={{ opacity: 0, willChange: "transform" }}
+            >
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: `
+                    radial-gradient(ellipse at 70% 65%, rgba(0, 238, 255, 0.14) 0%, transparent 50%),
+                    conic-gradient(from 0deg at 65% 60%, rgba(153, 0, 255, 0.07) 0deg, transparent 90deg, rgba(0, 238, 255, 0.06) 180deg, transparent 270deg)
+                  `,
+                  mixBlendMode: "screen",
+                  animation: "hazeRotate 90s linear infinite",
+                }}
+              />
+            </div>
           )}
         </div>
       </div>
@@ -1553,7 +1590,7 @@ export function Bento3Section() {
                 top: `${100 + idx * 76}px`,
                 zIndex: idx + 1,
               }}>
-                {/* Ambient glow — bleeds outside active card */}
+                {/* Ambient glow — shifts with pointer parallax for depth illusion */}
                 {!isMobile && (
                   <div
                     className="absolute pointer-events-none"
@@ -1563,6 +1600,7 @@ export function Bento3Section() {
                       background: `radial-gradient(ellipse at 50% 30%, ${SERVICES[idx].accent}12 0%, transparent 70%)`,
                       opacity: activeIndex === idx ? 1 : 0,
                       transition: "opacity 600ms cubic-bezier(0.16, 1, 0.3, 1)",
+                      transform: "translate(var(--cpx, 0px), var(--cpy, 0px))",
                       zIndex: 0,
                     }}
                   />
