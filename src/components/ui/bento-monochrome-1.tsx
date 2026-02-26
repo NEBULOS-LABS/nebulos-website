@@ -450,7 +450,15 @@ function StackCard({
 
     const onLeave = () => {
       if (compressed) return;
-      card.style.transform = "";
+      // Animate back to flat instead of snapping
+      gsap.to(card, {
+        rotateY: 0,
+        rotateX: 0,
+        z: 0,
+        duration: 0.6,
+        ease: "power2.out",
+        clearProps: "transform",
+      });
       card.style.setProperty("--spec-opacity", "0");
     };
 
@@ -1339,12 +1347,18 @@ export function Bento3Section() {
     }
 
     let rafId = 0;
+    let lastTime = performance.now();
 
     const tick = () => {
+      const now = performance.now();
+      const dt = (now - lastTime) / 16.67; // normalize to 60fps baseline
+      lastTime = now;
+
       // When pointer leaves section, ease normalized coords toward center
       if (!isInsideRef.current) {
-        pointerRef.current.nx += (0 - pointerRef.current.nx) * 0.03;
-        pointerRef.current.ny += (0 - pointerRef.current.ny) * 0.03;
+        const decay = 0.03 * dt;
+        pointerRef.current.nx += (0 - pointerRef.current.nx) * decay;
+        pointerRef.current.ny += (0 - pointerRef.current.ny) * decay;
       }
       const { nx, ny } = pointerRef.current;
       const influence = depthProxyRef.current.pointerInfluence;
