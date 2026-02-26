@@ -157,9 +157,11 @@ const LERP_FACTOR = 0.08;
 const LiquidCanvas = React.memo(function LiquidCanvas({
   reducedMotion,
   isMobile,
+  intensityRef,
 }: {
   reducedMotion: boolean;
   isMobile: boolean;
+  intensityRef?: React.RefObject<number>;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const paperScopeRef = useRef<any>(null);
@@ -235,8 +237,9 @@ const LiquidCanvas = React.memo(function LiquidCanvas({
         paths.forEach((path, bi) => {
           const cfg = BLOB_CONFIGS[bi];
           const orig = originals[bi];
-          const speed = rm ? 0 : (mob ? cfg.noiseSpeed * 0.3 : cfg.noiseSpeed);
-          const amp = rm ? 0 : cfg.noiseAmp;
+          const intensity = intensityRef?.current ?? 1;
+          const speed = rm ? 0 : (mob ? cfg.noiseSpeed * 0.3 : cfg.noiseSpeed) * intensity;
+          const amp = rm ? 0 : cfg.noiseAmp * intensity;
 
           path.segments.forEach((seg, si) => {
             const o = orig[si];
@@ -418,13 +421,14 @@ const visualComponents: Record<ServicePanel["visualType"], React.FC> = {
 function ScrollRail({
   activeIndex,
   total,
+  railFillRef,
   onCheckpointClick,
 }: {
   activeIndex: number;
   total: number;
+  railFillRef: React.RefObject<HTMLDivElement>;
   onCheckpointClick: (index: number) => void;
 }) {
-  const fillPct = activeIndex >= 0 ? ((activeIndex + 1) / total) * 100 : 0;
 
   return (
     <div
@@ -453,14 +457,14 @@ function ScrollRail({
           style={{ background: "rgba(255,255,255,0.06)" }}
         />
 
-        {/* Gradient fill line */}
+        {/* Gradient fill line — height driven by ScrollTrigger via ref */}
         <div
+          ref={railFillRef}
           className="absolute left-1/2 -translate-x-1/2 top-0 w-[1px] rounded-full"
           style={{
-            height: `${fillPct}%`,
+            height: "0%",
             background: "linear-gradient(to bottom, #00eeff, #ff00ff, #9900ff)",
             boxShadow: "0 0 10px rgba(0,238,255,0.3), 0 0 4px rgba(255,0,255,0.15)",
-            transition: "height 700ms cubic-bezier(0.16, 1, 0.3, 1)",
           }}
         />
 
@@ -584,6 +588,10 @@ function StackCard({
   const statRef = useRef<HTMLDivElement>(null);
   const revealTl = useRef<gsap.core.Timeline | null>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const compressedOverlayRef = useRef<HTMLDivElement>(null);
+  const desktopContentRef = useRef<HTMLDivElement>(null);
+  const watermarkRef = useRef<HTMLDivElement>(null);
+  const prevCompressedRef = useRef<boolean | null>(null);
 
   const EASE = "cubic-bezier(0.16, 1, 0.3, 1)";
 
@@ -597,11 +605,14 @@ function StackCard({
       const tg = tagsRef.current;
       const st = statRef.current;
 
+      const wm = watermarkRef.current;
+
       if (oc) gsap.set(oc, { opacity: 0, y: 14 });
       if (dl) gsap.set(dl, { opacity: 0, y: 12 });
       if (sc) gsap.set(sc, { opacity: 0, scale: 0.92, y: 10 });
       if (tg) gsap.set(tg, { opacity: 0, y: 10 });
       if (st) gsap.set(st, { opacity: 0, y: 8 });
+      if (wm) gsap.set(wm, { scale: 0.8, opacity: 0 });
 
       const tl = gsap.timeline({ paused: true, defaults: { ease: "expo.out" } });
       if (oc) tl.to(oc, { opacity: 1, y: 0, duration: 0.5 }, 0);
@@ -609,6 +620,7 @@ function StackCard({
       if (tg) tl.to(tg, { opacity: 1, y: 0, duration: 0.4 }, 0.18);
       if (sc) tl.to(sc, { opacity: 1, scale: 1, y: 0, duration: 0.55, ease: "back.out(1.3)" }, 0.26);
       if (st) tl.to(st, { opacity: 1, y: 0, duration: 0.4 }, 0.32);
+      if (wm) tl.to(wm, { scale: 1, opacity: 1, duration: 0.6, ease: "power3.out" }, 0.2);
 
       revealTl.current = tl;
       return () => { tl.kill(); };
@@ -623,6 +635,74 @@ function StackCard({
     else revealTl.current.reverse();
   }, [isActive, isMobile, reducedMotion]);
 
+  /* Desktop morph: compressed ↔ expanded (GPU-friendly height + crossfade) */
+  useEffect(() => {
+    if (isMobile) return;
+    const card = cardRef.current;
+    const overlay = compressedOverlayRef.current;
+    const content = desktopContentRef.current;
+    if (!card || !overlay || !content) return;
+
+    const prev = prevCompressedRef.current;
+    prevCompressedRef.current = compressed;
+
+    // Initial setup — no animation
+    if (prev === null) {
+      if (compressed) {
+        gsap.set(card, { height: 72, minHeight: 0, overflow: "hidden" });
+        gsap.set(overlay, { autoAlpha: 1 });
+        gsap.set(content, { autoAlpha: 0 });
+      } else {
+        gsap.set(overlay, { autoAlpha: 0 });
+      }
+      return;
+    }
+
+    // No state change — skip
+    if (prev === compressed) return;
+
+    // Reduced motion: instant switch
+    if (reducedMotion) {
+      if (compressed) {
+        gsap.set(card, { height: 72, minHeight: 0, overflow: "hidden" });
+        gsap.set(overlay, { autoAlpha: 1 });
+        gsap.set(content, { autoAlpha: 0 });
+      } else {
+        gsap.set(card, { clearProps: "height,minHeight,overflow" });
+        gsap.set(overlay, { autoAlpha: 0 });
+        gsap.set(content, { autoAlpha: 1 });
+      }
+      return;
+    }
+
+    if (compressed) {
+      // Morph → compressed: shrink card height, crossfade to bar
+      const currentH = card.offsetHeight;
+      gsap.set(card, { height: currentH, minHeight: 0, overflow: "hidden" });
+
+      const tl = gsap.timeline();
+      tl.to(content, { autoAlpha: 0, duration: 0.25, ease: "power2.in" }, 0)
+        .to(card, { height: 72, duration: 0.5, ease: "power3.inOut" }, 0.05)
+        .to(overlay, { autoAlpha: 1, duration: 0.3, ease: "power2.out" }, 0.25);
+      return () => { tl.kill(); };
+    } else {
+      // Morph → expanded: grow card height, crossfade to content
+      const savedH = card.style.height;
+      const savedMH = card.style.minHeight;
+      gsap.set(card, { height: "auto", minHeight: "clamp(520px, 60vh, 720px)" });
+      const targetH = card.offsetHeight;
+      card.style.height = savedH;
+      card.style.minHeight = savedMH;
+
+      const tl = gsap.timeline();
+      tl.to(overlay, { autoAlpha: 0, duration: 0.2, ease: "power2.in" }, 0)
+        .set(content, { autoAlpha: 1 }, 0.15)
+        .to(card, { height: targetH, duration: 0.5, ease: "power3.inOut" }, 0.1)
+        .set(card, { clearProps: "height,minHeight,overflow" });
+      return () => { tl.kill(); };
+    }
+  }, [compressed, isMobile, reducedMotion]);
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === "Enter" || e.key === " ") {
@@ -632,40 +712,6 @@ function StackCard({
     },
     [isMobile, onTap]
   );
-
-  /* ═══ COMPRESSED STATE (desktop, scrolled past) ═══ */
-  if (compressed) {
-    return (
-      <div ref={cardRef} className="svc-panel relative overflow-hidden" style={{
-        height: 72,
-        borderRadius: 16,
-        backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
-        background: "linear-gradient(145deg, rgba(25,25,30,0.5), rgba(15,15,20,0.7))",
-        borderTop: `2px solid ${service.accent}40`,
-        borderLeft: "1px solid rgba(255,255,255,0.04)",
-        borderRight: "1px solid rgba(255,255,255,0.04)",
-        borderBottom: "1px solid rgba(255,255,255,0.04)",
-        transition: `all 600ms cubic-bezier(0.16, 1, 0.3, 1)`,
-      }}>
-        <div className="flex items-center justify-between h-full px-6">
-          <div className="flex items-center gap-4">
-            <span className="text-xs font-mono font-bold tracking-wider" style={{ color: `${service.accent}80` }}>
-              {service.id}
-            </span>
-            <h3 className="text-sm font-medium text-white/50 truncate max-w-[200px]">
-              {service.title}
-            </h3>
-          </div>
-          {IconComp && (
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg"
-              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
-              <IconComp size={14} className="text-white/30" />
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div
@@ -677,23 +723,25 @@ function StackCard({
       className="svc-panel relative overflow-hidden outline-none"
       onClick={isMobile ? onTap : undefined}
       onKeyDown={isMobile ? handleKeyDown : undefined}
-      onMouseEnter={!isMobile ? () => setIsHovered(true) : undefined}
-      onMouseLeave={!isMobile ? () => setIsHovered(false) : undefined}
+      onMouseEnter={!isMobile && !compressed ? () => setIsHovered(true) : undefined}
+      onMouseLeave={!isMobile && !compressed ? () => setIsHovered(false) : undefined}
       style={{
         height: isMobile ? "auto" : undefined,
         minHeight: isMobile ? undefined : "clamp(520px, 60vh, 720px)",
-        borderRadius: isMobile ? 20 : 24,
+        borderRadius: compressed ? 16 : (isMobile ? 20 : 24),
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
         background: "linear-gradient(145deg, rgba(25,25,30,0.3), rgba(15,15,20,0.45))",
-        border: `1px solid ${expanded ? `${service.accent}50` : "rgba(255,255,255,0.06)"}`,
-        transform: (!isMobile && isHovered && !expanded) ? "translateY(-4px)" : "translateY(0)",
-        boxShadow: expanded
-          ? `inset 0 1px 0 rgba(255,255,255,0.12), 0 12px 48px ${service.accent}18, 0 0 80px ${service.accent}08`
-          : isHovered
-            ? `inset 0 1px 0 rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.3)`
-            : "inset 0 1px 0 rgba(255,255,255,0.06)",
-        transition: `transform 400ms cubic-bezier(0.16, 1, 0.3, 1), border-color 400ms ease, box-shadow 400ms ease`,
+        border: `1px solid ${compressed ? `${service.accent}30` : (expanded ? `${service.accent}50` : "rgba(255,255,255,0.06)")}`,
+        transform: (!isMobile && !compressed && isHovered && !expanded) ? "translateY(-4px)" : "translateY(0)",
+        boxShadow: compressed
+          ? "none"
+          : expanded
+            ? `inset 0 1px 0 rgba(255,255,255,0.12), 0 12px 48px ${service.accent}18, 0 0 80px ${service.accent}08`
+            : isHovered
+              ? `inset 0 1px 0 rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.3)`
+              : "inset 0 1px 0 rgba(255,255,255,0.06)",
+        transition: `transform 400ms cubic-bezier(0.16, 1, 0.3, 1), border-color 500ms ease, border-radius 500ms ease, box-shadow 400ms ease`,
         willChange: expanded ? "transform" : "auto",
       }}
     >
@@ -723,6 +771,36 @@ function StackCard({
           style={{ background: `radial-gradient(ellipse at 50% 20%, ${service.accent}12 0%, transparent 60%)` }}
         />
       </div>
+
+      {/* ═══ COMPRESSED OVERLAY (desktop, scrolled past) ═══ */}
+      {!isMobile && (
+        <div
+          ref={compressedOverlayRef}
+          className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-6"
+          style={{
+            height: 72,
+            background: "linear-gradient(145deg, rgba(20,20,25,0.95), rgba(12,12,17,0.98))",
+            borderRadius: "inherit",
+            opacity: 0,
+            visibility: "hidden",
+          }}
+        >
+          <div className="flex items-center gap-4">
+            <span className="text-xs font-mono font-bold tracking-wider" style={{ color: `${service.accent}80` }}>
+              {service.id}
+            </span>
+            <h3 className="text-sm font-medium text-white/50 truncate max-w-[200px]">
+              {service.title}
+            </h3>
+          </div>
+          {IconComp && (
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg"
+              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+              <IconComp size={14} className="text-white/30" />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ═══ MOBILE: COLLAPSED BAR ═══ */}
       {isMobile && !isExpanded && (
@@ -802,7 +880,7 @@ function StackCard({
 
       {/* ═══ DESKTOP CONTENT ═══ */}
       {!isMobile && (
-        <div className="relative z-10 flex flex-col h-full" style={{ padding: "clamp(1.5rem, 3vw, 2.5rem)" }}>
+        <div ref={desktopContentRef} className="relative z-10 flex flex-col h-full" style={{ padding: "clamp(1.5rem, 3vw, 2.5rem)" }}>
           {/* Icon badge — top right */}
           {IconComp && (
             <div
@@ -903,7 +981,7 @@ function StackCard({
           </div>
 
           {/* Card number watermark */}
-          <div className="absolute bottom-4 right-6 pointer-events-none select-none" style={{
+          <div ref={watermarkRef} className="absolute bottom-4 right-6 pointer-events-none select-none" style={{
             fontSize: "clamp(80px, 10vw, 140px)",
             fontWeight: 800,
             lineHeight: 1,
@@ -930,6 +1008,8 @@ export function Bento3Section() {
   const footerRef = useRef<HTMLDivElement>(null);
   const cardsContainerRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const railFillRef = useRef<HTMLDivElement>(null);
+  const canvasIntensityRef = useRef(1);
 
   /* Keyframe injection */
   useEffect(() => {
@@ -990,6 +1070,25 @@ export function Bento3Section() {
     return () => clearTimeout(timer);
   }, [activeIndex, isMobile]);
 
+  /* Continuous scroll progress — drives rail fill + canvas intensity */
+  useGSAP(
+    () => {
+      if (!cardsContainerRef.current || isMobile || reducedMotion) return;
+      ScrollTrigger.create({
+        trigger: cardsContainerRef.current,
+        start: "top 60%",
+        end: "bottom 30%",
+        onUpdate: (self) => {
+          if (railFillRef.current) {
+            railFillRef.current.style.height = `${self.progress * 100}%`;
+          }
+          canvasIntensityRef.current = 1 + self.progress * 0.4;
+        },
+      });
+    },
+    { scope: sectionRef, dependencies: [isMobile, reducedMotion] }
+  );
+
   /* Left column scroll entrance */
   useGSAP(
     () => {
@@ -1011,40 +1110,66 @@ export function Bento3Section() {
     { scope: sectionRef, dependencies: [isMobile, reducedMotion] }
   );
 
-  /* Card staggered entrance with perspective */
+  /* Card entrance — scrub-driven on desktop, once-fire on mobile */
   useGSAP(
     () => {
       if (reducedMotion) return;
-      cardRefs.current.forEach((wrapper, i) => {
-        if (!wrapper) return;
-        const card = wrapper.querySelector(".svc-panel");
-        if (!card) return;
-        gsap.set(card, {
-          opacity: 0,
-          y: 60,
-          scale: 0.95,
-          filter: "blur(8px)",
-          rotateX: 4,
-          transformPerspective: 1200,
+      const mm = gsap.matchMedia();
+
+      // Desktop: scrub-driven entrance tied to scroll position
+      mm.add("(min-width: 768px)", () => {
+        cardRefs.current.forEach((wrapper, i) => {
+          if (!wrapper) return;
+          const card = wrapper.querySelector(".svc-panel");
+          if (!card) return;
+          gsap.set(card, {
+            opacity: 0,
+            y: 60,
+            scale: 0.95,
+            filter: "blur(6px)",
+            rotateX: 4,
+            transformPerspective: 1200,
+          });
+          gsap.to(card, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            filter: "blur(0px)",
+            rotateX: 0,
+            scrollTrigger: {
+              trigger: wrapper,
+              start: "top 90%",
+              end: "top 55%",
+              scrub: 0.6,
+            },
+          });
         });
+      });
+
+      // Mobile: once-fire with stagger
+      mm.add("(max-width: 767px)", () => {
+        const cards = cardRefs.current
+          .map((w) => w?.querySelector(".svc-panel"))
+          .filter(Boolean);
+        if (!cards.length) return;
+        gsap.set(cards, { opacity: 0, y: 40 });
         ScrollTrigger.create({
-          trigger: wrapper,
+          trigger: cards[0]!,
           start: "top 85%",
           once: true,
           onEnter: () => {
-            gsap.to(card, {
+            gsap.to(cards, {
               opacity: 1,
               y: 0,
-              scale: 1,
-              filter: "blur(0px)",
-              rotateX: 0,
-              duration: 0.9,
-              delay: i * 0.08,
+              duration: 0.6,
+              stagger: 0.1,
               ease: "power3.out",
             });
           },
         });
       });
+
+      return () => mm.revert();
     },
     { scope: sectionRef, dependencies: [reducedMotion] }
   );
@@ -1084,7 +1209,7 @@ export function Bento3Section() {
     <div className="relative w-full bg-black text-gray-300" id="services">
       {/* Liquid nebula canvas background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <LiquidCanvas reducedMotion={reducedMotion} isMobile={isMobile} />
+        <LiquidCanvas reducedMotion={reducedMotion} isMobile={isMobile} intensityRef={canvasIntensityRef} />
       </div>
 
       {/* Noise grain overlay */}
@@ -1126,6 +1251,7 @@ export function Bento3Section() {
         <ScrollRail
           activeIndex={activeIndex}
           total={SERVICES.length}
+          railFillRef={railFillRef}
           onCheckpointClick={handleCheckpointClick}
         />
       )}
