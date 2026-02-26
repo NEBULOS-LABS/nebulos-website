@@ -143,10 +143,17 @@ void main() {
 }
 `;
 
-/* ─── CSS Fallback Gradient ───────────────────────────────────────────── */
+/* ─── Constants ───────────────────────────────────────────────────────── */
 
 const CSS_FALLBACK_GRADIENT =
   "radial-gradient(ellipse at 35% 45%, rgba(0,238,255,0.10) 0%, rgba(153,0,255,0.06) 30%, rgba(255,0,255,0.03) 50%, rgba(5,5,5,1) 70%)";
+
+const BRIGHTNESS = 0.5;
+const SPEED = 0.8;
+const TURBULENCE = 0.8;
+const DEPTH = 1.0;
+const OFFSET_X = -0.35;
+const OFFSET_Y = 0.10;
 
 /* ─── Helper: compile & link shader program ───────────────────────────── */
 
@@ -248,7 +255,7 @@ export default function AccretionBackground({
 
   /* ── Show / hide CSS fallback ──────────────────────────────────────── */
 
-  const showFallbackCb = useCallback(() => {
+  const showFallback = useCallback(() => {
     showFallbackRef.current = true;
     if (canvasRef.current) canvasRef.current.style.display = "none";
     if (fallbackNodeRef.current)
@@ -362,11 +369,11 @@ export default function AccretionBackground({
     // Set uniforms
     gl.uniform1f(u.uTime, t);
     gl.uniform2f(u.uResolution, canvas.width, canvas.height);
-    gl.uniform1f(u.u_brightness, 0.5);
-    gl.uniform1f(u.u_speed, 0.8);
-    gl.uniform1f(u.u_turbulence, 0.8);
-    gl.uniform1f(u.u_depth, 1.0);
-    gl.uniform2f(u.u_offset, -0.35, 0.1);
+    gl.uniform1f(u.u_brightness, BRIGHTNESS);
+    gl.uniform1f(u.u_speed, SPEED);
+    gl.uniform1f(u.u_turbulence, TURBULENCE);
+    gl.uniform1f(u.u_depth, DEPTH);
+    gl.uniform2f(u.u_offset, OFFSET_X, OFFSET_Y);
 
     // Draw fullscreen quad
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -394,7 +401,7 @@ export default function AccretionBackground({
       reducedMotionRef.current = e.matches || !!reducedMotion;
       if (reducedMotionRef.current) {
         cancelAnimationFrame(rafRef.current);
-        showFallbackCb();
+        showFallback();
       } else {
         hideFallback();
         if (glRef.current) {
@@ -402,7 +409,7 @@ export default function AccretionBackground({
         } else if (initGL()) {
           rafRef.current = requestAnimationFrame(renderLoop);
         } else {
-          showFallbackCb();
+          showFallback();
         }
       }
     };
@@ -417,15 +424,15 @@ export default function AccretionBackground({
         if (gl && canvas) {
           gl.uniform1f(u.uTime, 0);
           gl.uniform2f(u.uResolution, canvas.width, canvas.height);
-          gl.uniform1f(u.u_brightness, 0.5);
-          gl.uniform1f(u.u_speed, 0.8);
-          gl.uniform1f(u.u_turbulence, 0.8);
-          gl.uniform1f(u.u_depth, 1.0);
-          gl.uniform2f(u.u_offset, -0.35, 0.1);
+          gl.uniform1f(u.u_brightness, BRIGHTNESS);
+          gl.uniform1f(u.u_speed, SPEED);
+          gl.uniform1f(u.u_turbulence, TURBULENCE);
+          gl.uniform1f(u.u_depth, DEPTH);
+          gl.uniform2f(u.u_offset, OFFSET_X, OFFSET_Y);
           gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
         }
       } else {
-        showFallbackCb();
+        showFallback();
       }
       return () => {
         motionMq.removeEventListener("change", onMotionChange);
@@ -434,7 +441,7 @@ export default function AccretionBackground({
 
     // Initialize WebGL
     if (!initGL()) {
-      showFallbackCb();
+      showFallback();
       return () => {
         motionMq.removeEventListener("change", onMotionChange);
       };
@@ -467,7 +474,7 @@ export default function AccretionBackground({
     const onContextLost = (e: Event) => {
       e.preventDefault();
       cancelAnimationFrame(rafRef.current);
-      showFallbackCb();
+      showFallback();
     };
 
     const onContextRestored = () => {
@@ -503,7 +510,7 @@ export default function AccretionBackground({
       }
       glRef.current = null;
     };
-  }, [initGL, renderLoop, handleResize, showFallbackCb, hideFallback, reducedMotion]);
+  }, [initGL, renderLoop, handleResize, showFallback, hideFallback, reducedMotion]);
 
   /* ── Render ────────────────────────────────────────────────────────── */
 

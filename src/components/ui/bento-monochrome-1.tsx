@@ -1259,7 +1259,7 @@ export function Bento3Section() {
 
       {/* Directional fade — darker on right for card readability */}
       <div
-        className="absolute inset-0 pointer-events-none z-[2]"
+        className="absolute inset-0 pointer-events-none z-[3]"
         style={{
           background: "linear-gradient(to right, transparent 0%, transparent 30%, rgba(0,0,0,0.25) 60%, rgba(0,0,0,0.45) 100%)",
         }}
