@@ -131,7 +131,7 @@ const KEYFRAME_CSS = [
   "@keyframes mobileReveal{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}",
   ".svc-panel:focus-visible{outline:2px solid #00eeff;outline-offset:2px;border-radius:20px}",
   "@keyframes progressGlow{0%,100%{box-shadow:0 0 8px rgba(0,238,255,0.2)}50%{box-shadow:0 0 20px rgba(0,238,255,0.4),0 0 6px rgba(255,0,255,0.15)}}",
-  "@keyframes hazeRotate{0%{transform:rotate(0deg) scale(1.2)}100%{transform:rotate(360deg) scale(1.2)}}",
+  "@keyframes hazeRotate{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}",
 ].join("\n");
 
 /* ─────────────── Micro-Animated Visuals (Memoized) ─────────────── */
@@ -1358,6 +1358,7 @@ export function Bento3Section() {
     if (hazeEl) {
       hazeX = gsap.quickTo(hazeEl, "x", { duration: 1.1, ease: "power2.out" });
       hazeY = gsap.quickTo(hazeEl, "y", { duration: 1.1, ease: "power2.out" });
+      gsap.set(hazeEl, { scale: 1.2 }); // base scale — hides edge gaps during rotation
     }
 
     // Headline: mid-near response (0.6s)
@@ -1408,10 +1409,12 @@ export function Bento3Section() {
         outer.style.setProperty("--cpy", `${ny * 7 * influence}px`);
       }
 
-      // Haze opacity sync (set on outer wrapper, inner has CSS rotation)
+      // Haze opacity + scale sync (set on outer wrapper, inner has CSS rotation)
       const haze = hazeRef.current;
       if (haze) {
         haze.style.opacity = `${depthProxyRef.current.hazeOpacity}`;
+        // Subtle scale breathing: 1.2 ± 0.02 based on pointer X
+        gsap.set(haze, { scale: 1.2 + nx * 0.02 * influence });
       }
 
       // Lensing proximity: distance from pointer to black hole center (lower-right)
@@ -1431,7 +1434,13 @@ export function Bento3Section() {
 
     rafId = requestAnimationFrame(tick);
 
-    return () => cancelAnimationFrame(rafId);
+    return () => {
+      cancelAnimationFrame(rafId);
+      if (outer) {
+        outer.style.removeProperty("--cpx");
+        outer.style.removeProperty("--cpy");
+      }
+    };
   }, [isMobile, reducedMotion]);
 
   /* Handlers */
@@ -1599,7 +1608,7 @@ export function Bento3Section() {
                       borderRadius: 64,
                       background: `radial-gradient(ellipse at 50% 30%, ${SERVICES[idx].accent}12 0%, transparent 70%)`,
                       opacity: activeIndex === idx ? 1 : 0,
-                      transition: "opacity 600ms cubic-bezier(0.16, 1, 0.3, 1)",
+                      transition: "opacity 600ms cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.33, 1, 0.68, 1)",
                       transform: "translate(var(--cpx, 0px), var(--cpy, 0px))",
                       zIndex: 0,
                     }}
