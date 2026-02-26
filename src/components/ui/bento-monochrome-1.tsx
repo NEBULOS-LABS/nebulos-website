@@ -367,6 +367,7 @@ function StackCard({
   const compressedOverlayRef = useRef<HTMLDivElement>(null);
   const desktopContentRef = useRef<HTMLDivElement>(null);
   const watermarkRef = useRef<HTMLDivElement>(null);
+  const specularRef = useRef<HTMLDivElement>(null);
 
   const EASE = "cubic-bezier(0.16, 1, 0.3, 1)";
 
@@ -424,6 +425,42 @@ function StackCard({
     [isMobile, onTap]
   );
 
+  /* Card pointer parallax — perspective tilt + specular highlight */
+  useEffect(() => {
+    if (isMobile || reducedMotion) return;
+    const card = cardRef.current;
+    if (!card) return;
+
+    const onMove = (e: MouseEvent) => {
+      if (compressed || !expanded) return;
+      const rect = card.getBoundingClientRect();
+      const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      const ny = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+
+      // Perspective tilt: rotateY follows X, rotateX follows -Y (natural tilt)
+      card.style.transform = `perspective(1200px) rotateY(${nx * 1.2}deg) rotateX(${-ny * 0.8}deg) translateZ(16px)`;
+
+      // Specular highlight position
+      card.style.setProperty("--spec-x", `${50 + nx * 20}%`);
+      card.style.setProperty("--spec-y", `${50 + ny * 20}%`);
+      card.style.setProperty("--spec-opacity", "0.12");
+    };
+
+    const onLeave = () => {
+      if (compressed) return;
+      card.style.transform = "";
+      card.style.setProperty("--spec-opacity", "0");
+    };
+
+    card.addEventListener("mousemove", onMove);
+    card.addEventListener("mouseleave", onLeave);
+
+    return () => {
+      card.removeEventListener("mousemove", onMove);
+      card.removeEventListener("mouseleave", onLeave);
+    };
+  }, [isMobile, reducedMotion, expanded, compressed]);
+
   return (
     <div
       ref={cardRef}
@@ -452,10 +489,22 @@ function StackCard({
             : isHovered
               ? `inset 0 1px 0 rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.3)`
               : "inset 0 1px 0 rgba(255,255,255,0.06)",
-        transition: `transform 400ms cubic-bezier(0.16, 1, 0.3, 1), border-color 500ms ease, border-radius 500ms ease, box-shadow 400ms ease`,
+        transition: `${expanded ? '' : 'transform 400ms cubic-bezier(0.16, 1, 0.3, 1), '}border-color 500ms ease, border-radius 500ms ease, box-shadow 400ms ease`,
         willChange: expanded ? "transform" : "auto",
       }}
     >
+      {/* Specular highlight — tracks pointer, visible only when active */}
+      {!isMobile && (
+        <div
+          ref={specularRef}
+          className="absolute inset-0 z-[30] pointer-events-none rounded-[inherit]"
+          style={{
+            background: `radial-gradient(ellipse at var(--spec-x, 50%) var(--spec-y, 50%), rgba(255,255,255,var(--spec-opacity, 0)) 0%, transparent 60%)`,
+            transition: "opacity 300ms ease",
+          }}
+        />
+      )}
+
       {/* ═══ WALLPAPER LAYER ═══ */}
       <div className="absolute inset-0 z-0">
         <Image
