@@ -91,7 +91,7 @@ export default function Hero() {
   // No internal stickiness or useScroll needed because it flows naturally over the global video background!
   
   return (
-    <div ref={containerRef} className="relative min-h-[90vh] bg-transparent flex flex-col items-center justify-center pt-32 pb-20 overflow-hidden">
+    <div ref={containerRef} className="relative min-h-[90vh] bg-transparent flex flex-col items-center justify-center pt-32 pb-20">
       <div className="relative z-10 mx-auto w-full px-4 sm:px-6 lg:px-8 mt-10">
           <div className="mx-auto max-w-[1400px] text-center flex flex-col items-center">
             <h1
@@ -131,7 +131,7 @@ export default function Hero() {
           </p>
 
           <div
-            className="hero-anim opacity-0 mt-20 flex items-center justify-center p-8"
+            className="hero-anim opacity-0 mt-20 flex items-center justify-center p-8 overflow-hidden"
             style={{ transform: "translateY(20px)" }}
           >
             <Link 

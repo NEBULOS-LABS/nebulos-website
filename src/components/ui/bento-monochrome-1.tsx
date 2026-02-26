@@ -431,22 +431,11 @@ function ScrollRail({
 }) {
 
   return (
-    <div
-      className="hidden md:block absolute z-20"
-      style={{
-        left: "clamp(16px, 2vw, 32px)",
-        top: 0,
-        bottom: 0,
-        width: 48,
-      }}
-    >
-      {/* Sticky container — vertically centered in viewport */}
       <div
-        className="sticky flex flex-col items-center"
+        className="relative flex flex-col items-center"
         style={{
-          top: "50%",
-          transform: "translateY(-50%)",
           height: `${total * 64 + (total - 1) * 20}px`,
+          width: 48,
         }}
         role="navigation"
         aria-label="Service progress"
@@ -548,7 +537,6 @@ function ScrollRail({
           />
         )}
       </div>
-    </div>
   );
 }
 
@@ -591,7 +579,6 @@ function StackCard({
   const compressedOverlayRef = useRef<HTMLDivElement>(null);
   const desktopContentRef = useRef<HTMLDivElement>(null);
   const watermarkRef = useRef<HTMLDivElement>(null);
-  const prevCompressedRef = useRef<boolean | null>(null);
 
   const EASE = "cubic-bezier(0.16, 1, 0.3, 1)";
 
@@ -635,73 +622,9 @@ function StackCard({
     else revealTl.current.reverse();
   }, [isActive, isMobile, reducedMotion]);
 
-  /* Desktop morph: compressed ↔ expanded (GPU-friendly height + crossfade) */
-  useEffect(() => {
-    if (isMobile) return;
-    const card = cardRef.current;
-    const overlay = compressedOverlayRef.current;
-    const content = desktopContentRef.current;
-    if (!card || !overlay || !content) return;
-
-    const prev = prevCompressedRef.current;
-    prevCompressedRef.current = compressed;
-
-    // Initial setup — no animation
-    if (prev === null) {
-      if (compressed) {
-        gsap.set(card, { height: 72, minHeight: 0, overflow: "hidden" });
-        gsap.set(overlay, { autoAlpha: 1 });
-        gsap.set(content, { autoAlpha: 0 });
-      } else {
-        gsap.set(overlay, { autoAlpha: 0 });
-      }
-      return;
-    }
-
-    // No state change — skip
-    if (prev === compressed) return;
-
-    // Reduced motion: instant switch
-    if (reducedMotion) {
-      if (compressed) {
-        gsap.set(card, { height: 72, minHeight: 0, overflow: "hidden" });
-        gsap.set(overlay, { autoAlpha: 1 });
-        gsap.set(content, { autoAlpha: 0 });
-      } else {
-        gsap.set(card, { clearProps: "height,minHeight,overflow" });
-        gsap.set(overlay, { autoAlpha: 0 });
-        gsap.set(content, { autoAlpha: 1 });
-      }
-      return;
-    }
-
-    if (compressed) {
-      // Morph → compressed: shrink card height, crossfade to bar
-      const currentH = card.offsetHeight;
-      gsap.set(card, { height: currentH, minHeight: 0, overflow: "hidden" });
-
-      const tl = gsap.timeline();
-      tl.to(content, { autoAlpha: 0, duration: 0.25, ease: "power2.in" }, 0)
-        .to(card, { height: 72, duration: 0.5, ease: "power3.inOut" }, 0.05)
-        .to(overlay, { autoAlpha: 1, duration: 0.3, ease: "power2.out" }, 0.25);
-      return () => { tl.kill(); };
-    } else {
-      // Morph → expanded: grow card height, crossfade to content
-      const savedH = card.style.height;
-      const savedMH = card.style.minHeight;
-      gsap.set(card, { height: "auto", minHeight: "clamp(520px, 60vh, 720px)" });
-      const targetH = card.offsetHeight;
-      card.style.height = savedH;
-      card.style.minHeight = savedMH;
-
-      const tl = gsap.timeline();
-      tl.to(overlay, { autoAlpha: 0, duration: 0.2, ease: "power2.in" }, 0)
-        .set(content, { autoAlpha: 1 }, 0.15)
-        .to(card, { height: targetH, duration: 0.5, ease: "power3.inOut" }, 0.1)
-        .set(card, { clearProps: "height,minHeight,overflow" });
-      return () => { tl.kill(); };
-    }
-  }, [compressed, isMobile, reducedMotion]);
+  /* Desktop morph now driven by scroll-scrub from parent (Bento3Section).
+     Initial overlay hide is via Tailwind classes (opacity-0 invisible) so
+     React re-renders don't override GSAP's inline style changes. */
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -727,7 +650,7 @@ function StackCard({
       onMouseLeave={!isMobile && !compressed ? () => setIsHovered(false) : undefined}
       style={{
         height: isMobile ? "auto" : undefined,
-        minHeight: isMobile ? undefined : "clamp(520px, 60vh, 720px)",
+        minHeight: isMobile ? undefined : "clamp(380px, 42vh, 520px)",
         borderRadius: compressed ? 16 : (isMobile ? 20 : 24),
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
@@ -776,13 +699,12 @@ function StackCard({
       {!isMobile && (
         <div
           ref={compressedOverlayRef}
-          className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-6"
+          data-compressed-overlay
+          className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-6 opacity-0 invisible"
           style={{
             height: 72,
             background: "linear-gradient(145deg, rgba(20,20,25,0.95), rgba(12,12,17,0.98))",
             borderRadius: "inherit",
-            opacity: 0,
-            visibility: "hidden",
           }}
         >
           <div className="flex items-center gap-4">
@@ -880,7 +802,7 @@ function StackCard({
 
       {/* ═══ DESKTOP CONTENT ═══ */}
       {!isMobile && (
-        <div ref={desktopContentRef} className="relative z-10 flex flex-col h-full" style={{ padding: "clamp(1.5rem, 3vw, 2.5rem)" }}>
+        <div ref={desktopContentRef} data-desktop-content className="relative z-10 flex flex-col h-full" style={{ padding: "clamp(1.5rem, 3vw, 2.5rem)" }}>
           {/* Icon badge — top right */}
           {IconComp && (
             <div
@@ -1010,6 +932,10 @@ export function Bento3Section() {
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const railFillRef = useRef<HTMLDivElement>(null);
   const canvasIntensityRef = useRef(1);
+  const cursorDotRef = useRef<HTMLDivElement>(null);
+  const cursorRingRef = useRef<HTMLDivElement>(null);
+  const outerRef = useRef<HTMLDivElement>(null);
+  const cardNaturalHeights = useRef<number[]>([]);
 
   /* Keyframe injection */
   useEffect(() => {
@@ -1063,13 +989,6 @@ export function Bento3Section() {
     { scope: sectionRef, dependencies: [isMobile, reducedMotion] }
   );
 
-  /* Refresh ScrollTrigger after card height transitions */
-  useEffect(() => {
-    if (isMobile) return;
-    const timer = setTimeout(() => { ScrollTrigger.refresh(); }, 700);
-    return () => clearTimeout(timer);
-  }, [activeIndex, isMobile]);
-
   /* Continuous scroll progress — drives rail fill + canvas intensity */
   useGSAP(
     () => {
@@ -1089,23 +1008,41 @@ export function Bento3Section() {
     { scope: sectionRef, dependencies: [isMobile, reducedMotion] }
   );
 
-  /* Left column scroll entrance */
+  /* Left column scroll entrance — horizontal wipe from left */
   useGSAP(
     () => {
-      if (!headerRef.current || isMobile || reducedMotion) return;
+      if (!headerRef.current || reducedMotion) return;
       const children = headerRef.current.children;
-      gsap.set(children, { opacity: 0, y: 30, filter: "blur(6px)" });
-      ScrollTrigger.create({
-        trigger: headerRef.current,
-        start: "top 80%",
-        once: true,
-        onEnter: () => {
-          gsap.to(children, {
-            opacity: 1, y: 0, filter: "blur(0px)",
-            duration: 0.8, stagger: 0.12, ease: "power3.out",
-          });
-        },
-      });
+
+      if (isMobile) {
+        // Mobile: vertical fade-in (unchanged)
+        gsap.set(children, { opacity: 0, y: 30, filter: "blur(6px)" });
+        ScrollTrigger.create({
+          trigger: headerRef.current,
+          start: "top 80%",
+          once: true,
+          onEnter: () => {
+            gsap.to(children, {
+              opacity: 1, y: 0, filter: "blur(0px)",
+              duration: 0.8, stagger: 0.12, ease: "power3.out",
+            });
+          },
+        });
+      } else {
+        // Desktop: directional wipe from left — matches left-justified alignment
+        gsap.set(children, { opacity: 0, x: -30, filter: "blur(6px)" });
+        ScrollTrigger.create({
+          trigger: headerRef.current,
+          start: "top 80%",
+          once: true,
+          onEnter: () => {
+            gsap.to(children, {
+              opacity: 1, x: 0, filter: "blur(0px)",
+              duration: 0.9, stagger: 0.14, ease: "power3.out",
+            });
+          },
+        });
+      }
     },
     { scope: sectionRef, dependencies: [isMobile, reducedMotion] }
   );
@@ -1116,7 +1053,8 @@ export function Bento3Section() {
       if (reducedMotion) return;
       const mm = gsap.matchMedia();
 
-      // Desktop: scrub-driven entrance tied to scroll position
+      // Desktop: scrub-driven entrance — horizontal slide from right
+      // Creates a directional counterpoint to the left column's wipe-from-left
       mm.add("(min-width: 768px)", () => {
         cardRefs.current.forEach((wrapper, i) => {
           if (!wrapper) return;
@@ -1124,18 +1062,18 @@ export function Bento3Section() {
           if (!card) return;
           gsap.set(card, {
             opacity: 0,
-            y: 60,
-            scale: 0.95,
-            filter: "blur(6px)",
-            rotateX: 4,
+            x: 40,
+            y: 30,
+            scale: 0.97,
+            filter: "blur(4px)",
             transformPerspective: 1200,
           });
           gsap.to(card, {
             opacity: 1,
+            x: 0,
             y: 0,
             scale: 1,
             filter: "blur(0px)",
-            rotateX: 0,
             scrollTrigger: {
               trigger: wrapper,
               start: "top 90%",
@@ -1195,6 +1133,253 @@ export function Bento3Section() {
     { scope: sectionRef, dependencies: [reducedMotion] }
   );
 
+  /* ═══ SCROLL-DRIVEN CARD COMPRESSION ═══ */
+  /* As card N+1 enters viewport, card N continuously compresses from full → 72px bar.
+     Once fully compressed, the bar switches to position:fixed so it stays pinned
+     even after its sticky wrapper scrolls off-screen. This lets all compressed bars
+     stack visually at the top of the viewport as the user scrolls deeper. */
+  useGSAP(
+    () => {
+      if (isMobile || reducedMotion) return;
+
+      // Measure natural heights after initial render
+      cardRefs.current.forEach((wrapper, i) => {
+        if (!wrapper) return;
+        const card = wrapper.querySelector(".svc-panel") as HTMLElement;
+        if (card) {
+          const savedH = card.style.height;
+          const savedMH = card.style.minHeight;
+          card.style.height = "";
+          card.style.minHeight = "";
+          cardNaturalHeights.current[i] = card.offsetHeight;
+          card.style.height = savedH;
+          card.style.minHeight = savedMH;
+        }
+      });
+
+      // Measure card horizontal position from the right column container.
+      // All cards share the same left/width since they're in the same grid column.
+      const container = cardsContainerRef.current;
+      let fixedLeft = 0;
+      let fixedWidth = 0;
+      if (container) {
+        const cr = container.getBoundingClientRect();
+        fixedLeft = cr.left;
+        fixedWidth = cr.width;
+      }
+
+      // Track which cards are currently pinned with position:fixed
+      const pinnedCards = new Set<number>();
+
+      // Helper: pin a compressed card bar with position:fixed
+      const pinCard = (card: HTMLElement, i: number) => {
+        if (pinnedCards.has(i)) return;
+        pinnedCards.add(i);
+        const stickyTop = 100 + i * 76;
+        card.style.position = "fixed";
+        card.style.top = `${stickyTop}px`;
+        card.style.left = `${fixedLeft}px`;
+        card.style.width = `${fixedWidth}px`;
+        card.style.zIndex = `${50 + i}`;
+        // Ensure fully compressed state
+        card.style.height = "72px";
+        card.style.minHeight = "0";
+        card.style.overflow = "hidden";
+      };
+
+      // Helper: unpin a card (revert to normal flow inside sticky parent)
+      const unpinCard = (card: HTMLElement, i: number) => {
+        if (!pinnedCards.has(i)) return;
+        pinnedCards.delete(i);
+        card.style.position = "";
+        card.style.top = "";
+        card.style.left = "";
+        card.style.width = "";
+        card.style.zIndex = "";
+      };
+
+      // Update fixedLeft/fixedWidth on resize so pinned cards stay aligned
+      const handleResize = () => {
+        if (!container) return;
+        const cr = container.getBoundingClientRect();
+        fixedLeft = cr.left;
+        fixedWidth = cr.width;
+        // Update any currently pinned cards
+        pinnedCards.forEach((idx) => {
+          const wrapper = cardRefs.current[idx];
+          const card = wrapper?.querySelector(".svc-panel") as HTMLElement;
+          if (card) {
+            card.style.left = `${fixedLeft}px`;
+            card.style.width = `${fixedWidth}px`;
+          }
+        });
+      };
+      window.addEventListener("resize", handleResize);
+
+      cardRefs.current.forEach((wrapper, i) => {
+        if (!wrapper || i >= SERVICES.length - 1) return;
+        const nextWrapper = cardRefs.current[i + 1];
+        if (!nextWrapper) return;
+
+        const card = wrapper.querySelector(".svc-panel") as HTMLElement;
+        const overlay = card?.querySelector("[data-compressed-overlay]") as HTMLElement;
+        const content = card?.querySelector("[data-desktop-content]") as HTMLElement;
+        if (!card || !overlay || !content) return;
+
+        const naturalH = cardNaturalHeights.current[i] || card.offsetHeight;
+
+        ScrollTrigger.create({
+          trigger: nextWrapper,
+          start: "top 85%",
+          end: "top 40%",
+          scrub: 0.4,
+          onUpdate: (self) => {
+            const p = self.progress;
+
+            // Pinned cards are fully compressed and position:fixed —
+            // don't let scrub lag override them. Only onEnterBack unpins.
+            if (pinnedCards.has(i)) return;
+
+            if (p <= 0.005) {
+              // Fully restored — clear all inline styles
+              card.style.height = "";
+              card.style.minHeight = "";
+              card.style.overflow = "";
+              content.style.opacity = "1";
+              overlay.style.opacity = "0";
+              overlay.style.visibility = "hidden";
+              return;
+            }
+
+            // Height: naturalH → 72px
+            const h = naturalH - (naturalH - 72) * p;
+            card.style.height = `${h}px`;
+            card.style.minHeight = "0";
+            card.style.overflow = "hidden";
+
+            // Content fadeout (first 60% of scrub)
+            const cp = Math.min(p / 0.6, 1);
+            content.style.opacity = `${1 - cp}`;
+
+            // Bar fadein (last 40% of scrub)
+            const bp = Math.max((p - 0.6) / 0.4, 0);
+            overlay.style.opacity = `${bp}`;
+            overlay.style.visibility = bp > 0.01 ? "visible" : "hidden";
+          },
+          // Card fully compressed — pin it so the bar stays visible
+          onLeave: () => {
+            pinCard(card, i);
+            content.style.opacity = "0";
+            overlay.style.opacity = "1";
+            overlay.style.visibility = "visible";
+          },
+          // Scrolling back into compression range — unpin to let scrub control it
+          onEnterBack: () => {
+            unpinCard(card, i);
+          },
+        });
+      });
+
+      /* Section boundary — hide pinned bars when user scrolls past services.
+         Without this, position:fixed bars bleed over guarantee/FAQ/footer.
+         "bottom bottom" = onLeave fires when services bottom reaches viewport
+         bottom, exactly when the next section first enters view. */
+      ScrollTrigger.create({
+        trigger: outerRef.current,
+        start: "top top",
+        end: "bottom bottom",
+        onLeave: () => {
+          pinnedCards.forEach((idx) => {
+            const w = cardRefs.current[idx];
+            const c = w?.querySelector(".svc-panel") as HTMLElement;
+            // display:none hides the entire subtree unconditionally —
+            // unlike visibility:hidden, children cannot override it.
+            if (c) { c.style.display = "none"; }
+          });
+        },
+        onEnterBack: () => {
+          pinnedCards.forEach((idx) => {
+            const w = cardRefs.current[idx];
+            const c = w?.querySelector(".svc-panel") as HTMLElement;
+            if (c) { c.style.display = ""; }
+          });
+        },
+      });
+
+      return () => {
+        window.removeEventListener("resize", handleResize);
+      };
+    },
+    { scope: sectionRef, dependencies: [isMobile, reducedMotion] }
+  );
+
+  /* ═══ CUSTOM CURSOR — section-scoped dot + ring ═══ */
+  useEffect(() => {
+    if (isMobile || reducedMotion) return;
+    const dot = cursorDotRef.current;
+    const ring = cursorRingRef.current;
+    const section = outerRef.current;
+    if (!dot || !ring || !section) return;
+
+    // GSAP quickTo for the ring's lerped follow (0.4s duration = ~100ms perceived lag)
+    const ringX = gsap.quickTo(ring, "x", { duration: 0.4, ease: "power3.out" });
+    const ringY = gsap.quickTo(ring, "y", { duration: 0.4, ease: "power3.out" });
+
+    let currentTarget: string | null = null;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      // Dot follows instantly via transform
+      gsap.set(dot, { x: e.clientX, y: e.clientY });
+      // Ring follows with elastic lag
+      ringX(e.clientX);
+      ringY(e.clientY);
+
+      // Detect hover target for cursor morphing
+      const target = e.target as HTMLElement;
+      const isOverCard = target.closest(".svc-panel");
+      const isOverButton = target.closest("a, button");
+      const newTarget = isOverButton ? "button" : isOverCard ? "card" : null;
+
+      if (newTarget !== currentTarget) {
+        currentTarget = newTarget;
+        if (isOverButton) {
+          gsap.to(dot, { scale: 0, duration: 0.15 });
+          gsap.to(ring, { width: 48, height: 48, borderColor: "rgba(255,255,255,0.5)", duration: 0.3, ease: "power2.out" });
+        } else if (isOverCard) {
+          gsap.to(dot, { scale: 1.5, duration: 0.2, ease: "back.out(2)" });
+          gsap.to(ring, { width: 48, height: 48, borderColor: "rgba(255,255,255,0.4)", duration: 0.3, ease: "power2.out" });
+        } else {
+          gsap.to(dot, { scale: 1, duration: 0.2 });
+          gsap.to(ring, { width: 32, height: 32, borderColor: "rgba(255,255,255,0.15)", duration: 0.3 });
+        }
+      }
+    };
+
+    const handleEnter = () => {
+      section.style.cursor = "none";
+      gsap.to(dot, { opacity: 0.9, scale: 1, duration: 0.3, ease: "power2.out" });
+      gsap.to(ring, { opacity: 1, scale: 1, duration: 0.35, ease: "power2.out", delay: 0.05 });
+    };
+
+    const handleLeave = () => {
+      section.style.cursor = "";
+      currentTarget = null;
+      gsap.to(dot, { opacity: 0, scale: 0.5, duration: 0.2, ease: "power2.in" });
+      gsap.to(ring, { opacity: 0, scale: 0.5, duration: 0.2, ease: "power2.in" });
+    };
+
+    section.addEventListener("mousemove", handleMouseMove);
+    section.addEventListener("mouseenter", handleEnter);
+    section.addEventListener("mouseleave", handleLeave);
+
+    return () => {
+      section.removeEventListener("mousemove", handleMouseMove);
+      section.removeEventListener("mouseenter", handleEnter);
+      section.removeEventListener("mouseleave", handleLeave);
+      section.style.cursor = "";
+    };
+  }, [isMobile, reducedMotion]);
+
   /* Handlers */
   const handleCheckpointClick = useCallback((index: number) => {
     const card = cardRefs.current[index];
@@ -1206,7 +1391,7 @@ export function Bento3Section() {
   }, []);
 
   return (
-    <div className="relative w-full bg-black text-gray-300" id="services">
+    <div ref={outerRef} className="relative w-full bg-black text-gray-300" id="services">
       {/* Liquid nebula canvas background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         <LiquidCanvas reducedMotion={reducedMotion} isMobile={isMobile} intensityRef={canvasIntensityRef} />
@@ -1246,34 +1431,27 @@ export function Bento3Section() {
       <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#9900ff]/60 to-transparent z-[3]" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-[2px] bg-gradient-to-r from-transparent via-[#00eeff]/80 to-transparent shadow-[0_0_25px_rgba(0,238,255,1)] z-[3]" />
 
-      {/* ═══ SCROLL RAIL — Far left (desktop only) ═══ */}
+      {/* ═══ SCROLL RAIL — absolute far-left, outside grid ═══ */}
       {!isMobile && (
-        <ScrollRail
-          activeIndex={activeIndex}
-          total={SERVICES.length}
-          railFillRef={railFillRef}
-          onCheckpointClick={handleCheckpointClick}
-        />
-      )}
-
-      {/* ═══ HORIZONTAL ACCENT LINE — tracks active card, scoped to section ═══ */}
-      {!isMobile && activeIndex >= 0 && (
         <div
-          className="absolute left-0 right-0 z-[4] pointer-events-none"
-          style={{
-            top: 0,
-            bottom: 0,
-          }}
+          className="hidden md:block absolute z-20"
+          style={{ left: "clamp(16px, 2.5vw, 40px)", top: 0, bottom: 0, width: 48 }}
         >
           <div
-            className="sticky left-0 right-0 w-full"
+            className="sticky flex flex-col items-center"
             style={{
-              top: `${100 + activeIndex * 72 + 36}px`,
-              height: 1,
-              background: `linear-gradient(to right, transparent 0%, ${SERVICES[activeIndex].accent}15 10%, ${SERVICES[activeIndex].accent}30 50%, ${SERVICES[activeIndex].accent}15 90%, transparent 100%)`,
-              transition: "top 700ms cubic-bezier(0.16, 1, 0.3, 1), background 400ms ease",
+              top: "50%",
+              transform: "translateY(-50%)",
+              height: `${SERVICES.length * 64 + (SERVICES.length - 1) * 20}px`,
             }}
-          />
+          >
+            <ScrollRail
+              activeIndex={activeIndex}
+              total={SERVICES.length}
+              railFillRef={railFillRef}
+              onCheckpointClick={handleCheckpointClick}
+            />
+          </div>
         </div>
       )}
 
@@ -1283,8 +1461,8 @@ export function Bento3Section() {
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, amount: 0.08 }}
-        className="relative z-10 mx-auto max-w-6xl py-20 md:py-28"
-        style={{ paddingInline: "clamp(1.25rem, 5vw, 3rem)" }}
+        className="relative z-10 mx-auto max-w-7xl py-20 md:py-28"
+        style={{ paddingInline: "clamp(1rem, 4vw, 2.5rem)" }}
       >
         {/* Screen reader announcement */}
         <div className="sr-only" aria-live="polite" aria-atomic="true">
@@ -1293,43 +1471,42 @@ export function Bento3Section() {
             : "Scroll to explore services"}
         </div>
 
-        {/* ═══ SECTION HEADER — Centered, full-width ═══ */}
-        <div ref={headerRef} className="flex flex-col items-center text-center gap-5 pb-16 md:pb-20 max-w-2xl mx-auto">
-          {/* Eyebrow */}
-          <div className="flex items-center gap-3">
-            <span className="h-2 w-2 rounded-full bg-[#00eeff] shadow-[0_0_10px_rgba(0,238,255,0.5)] animate-pulse" />
-            <span className="text-[11px] uppercase tracking-[0.5em] text-[#00eeff]">Core Capabilities</span>
-          </div>
-          {/* Headline */}
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-[1.1]"
-            style={{ background: "linear-gradient(135deg, #ffffff 0%, #ffffff 40%, #00eeff 70%, #9900ff 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-            End-to-end development across every layer of the stack.
-          </h2>
-          {/* Subtitle */}
-          <p className="text-base md:text-lg text-gray-400 font-light leading-relaxed max-w-lg">
-            From world-class product interfaces to intelligent backend systems. We build secure, scalable software that moves markets.
-          </p>
-        </div>
+        {/* ═══ 2-COLUMN LAYOUT (desktop) / Single column (mobile) ═══ */}
+        <div className="md:grid md:grid-cols-[minmax(240px,1fr)_minmax(0,3.5fr)] md:gap-12 lg:gap-16">
 
-        {/* ═══ CARDS — Sticky stacking deck ═══ */}
-        <div ref={cardsContainerRef} className={isMobile ? "w-full space-y-3 pb-16" : "relative pb-[50vh]"}>
+          {/* ═══ LEFT COLUMN — Sticky narrative anchor (left-justified) ═══ */}
+          <div
+            ref={headerRef}
+            className="flex flex-col items-start text-left gap-4 pb-10 md:pb-0 md:sticky md:self-start"
+            style={{ top: "clamp(80px, 10vh, 120px)" }}
+          >
+            {/* Eyebrow */}
+            <div className="flex items-center gap-3">
+              <span className="h-2 w-2 rounded-full bg-[#00eeff] shadow-[0_0_10px_rgba(0,238,255,0.5)] animate-pulse" />
+              <span className="text-[11px] uppercase tracking-[0.5em] text-[#00eeff]">Core Capabilities</span>
+            </div>
+            {/* Headline */}
+            <h2 className="text-3xl md:text-4xl lg:text-[2.75rem] font-semibold tracking-tight leading-[1.1]"
+              style={{ background: "linear-gradient(135deg, #ffffff 0%, #ffffff 40%, #00eeff 70%, #9900ff 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+              End-to-end development across every layer of the stack.
+            </h2>
+            {/* Subtitle */}
+            <p className="text-base md:text-lg text-gray-400 font-light leading-relaxed md:max-w-none">
+              From world-class product interfaces to intelligent backend systems. We build secure, scalable software that moves markets.
+            </p>
+
+          </div>
+
+          {/* ═══ RIGHT COLUMN — Scrolling cards (right-justified) ═══ */}
+          <div ref={cardsContainerRef} className={isMobile ? "w-full space-y-3 pb-16" : "relative pb-[30vh] pt-6 lg:pt-10 md:ml-auto"}>
           {SERVICES.map((service, idx) => (
             <div key={service.id} ref={(el) => { cardRefs.current[idx] = el; }}
               className={isMobile ? "" : "relative"}
-              style={isMobile ? undefined : { height: "100vh" }}>
+              style={isMobile ? undefined : { height: idx === SERVICES.length - 1 ? "60vh" : "90vh" }}>
               <div style={isMobile ? undefined : {
                 position: "sticky" as const,
-                top: `${100 + idx * 72}px`,
+                top: `${100 + idx * 76}px`,
                 zIndex: idx + 1,
-                ...(activeIndex >= 0 && idx > activeIndex ? {
-                  transform: "scale(0.985)",
-                  opacity: 0.6,
-                  transition: "transform 600ms cubic-bezier(0.16, 1, 0.3, 1), opacity 600ms cubic-bezier(0.16, 1, 0.3, 1)",
-                } : {
-                  transform: "scale(1)",
-                  opacity: 1,
-                  transition: "transform 600ms cubic-bezier(0.16, 1, 0.3, 1), opacity 600ms cubic-bezier(0.16, 1, 0.3, 1)",
-                }),
               }}>
                 {/* Ambient glow — bleeds outside active card */}
                 {!isMobile && (
@@ -1361,6 +1538,7 @@ export function Bento3Section() {
               </div>
             </div>
           ))}
+          </div>
         </div>
 
         {/* ═══ FOOTER — Metrics + CTA ═══ */}
@@ -1384,6 +1562,36 @@ export function Bento3Section() {
           </div>
         </div>
       </motion.section>
+
+      {/* ═══ CUSTOM CURSOR — dot + ring, section-scoped ═══ */}
+      {!isMobile && (
+        <>
+          <div
+            ref={cursorDotRef}
+            className="fixed top-0 left-0 pointer-events-none z-[9999] rounded-full"
+            style={{
+              width: 8,
+              height: 8,
+              background: "white",
+              opacity: 0,
+              transform: "translate(-50%, -50%)",
+              willChange: "transform",
+            }}
+          />
+          <div
+            ref={cursorRingRef}
+            className="fixed top-0 left-0 pointer-events-none z-[9998] rounded-full"
+            style={{
+              width: 32,
+              height: 32,
+              border: "1.5px solid rgba(255,255,255,0.15)",
+              opacity: 0,
+              transform: "translate(-50%, -50%)",
+              willChange: "transform",
+            }}
+          />
+        </>
+      )}
     </div>
   );
 }
