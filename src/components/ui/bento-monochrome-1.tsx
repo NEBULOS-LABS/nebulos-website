@@ -724,6 +724,7 @@ export function Bento3Section() {
   const cardNaturalHeights = useRef<number[]>([]);
   const virtualTriggerRef = useRef<HTMLDivElement>(null);
   const dissolveSentinelRef = useRef<HTMLDivElement>(null);
+  const diskOffsetYRef = useRef(0.35);
 
   /* Keyframe injection */
   useEffect(() => {
@@ -918,6 +919,35 @@ export function Bento3Section() {
       });
     },
     { scope: sectionRef, dependencies: [reducedMotion] }
+  );
+
+  /* ═══ ACCRETION DISK PARALLAX — scrub u_offset.y via sticky canvas ═══ */
+  useGSAP(
+    () => {
+      if (isMobile || reducedMotion) return;
+
+      const proxy = { y: 0.35 };
+
+      gsap.to(proxy, {
+        keyframes: {
+          "0%":   { y: 0.35 },
+          "15%":  { y: 0.10 },
+          "85%":  { y: 0.10 },
+          "100%": { y: -0.20 },
+        },
+        ease: "none",
+        scrollTrigger: {
+          trigger: outerRef.current,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 0.8,
+        },
+        onUpdate: () => {
+          diskOffsetYRef.current = proxy.y;
+        },
+      });
+    },
+    { scope: sectionRef, dependencies: [isMobile, reducedMotion] }
   );
 
   /* ═══ SCROLL-DRIVEN CARD COMPRESSION ═══ */
@@ -1236,34 +1266,34 @@ export function Bento3Section() {
 
   return (
     <div ref={outerRef} className="relative w-full bg-black text-gray-300" id="services">
-      {/* Accretion disk background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <AccretionBackground reducedMotion={reducedMotion} />
+      {/* Background layers — sticky on desktop (parallax), absolute on mobile */}
+      <div className={`${isMobile ? 'absolute inset-0' : 'sticky top-0 h-screen w-full'} overflow-hidden pointer-events-none z-0`}>
+        <AccretionBackground reducedMotion={reducedMotion} offsetYRef={diskOffsetYRef} />
+
+        {/* Noise grain overlay */}
+        <div className="absolute inset-0 pointer-events-none z-[1]" style={{ opacity: 0.03, mixBlendMode: "overlay" }}>
+          <svg width="100%" height="100%">
+            <filter id="svcNoise">
+              <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
+            </filter>
+            <rect width="100%" height="100%" filter="url(#svcNoise)" />
+          </svg>
+        </div>
+
+        {/* Vignette */}
+        <div
+          className="absolute inset-0 pointer-events-none z-[2]"
+          style={{ background: "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.35) 100%)" }}
+        />
+
+        {/* Directional fade — darker on right for card readability */}
+        <div
+          className="absolute inset-0 pointer-events-none z-[3]"
+          style={{
+            background: "linear-gradient(to right, transparent 0%, transparent 30%, rgba(0,0,0,0.25) 60%, rgba(0,0,0,0.45) 100%)",
+          }}
+        />
       </div>
-
-      {/* Noise grain overlay */}
-      <div className="absolute inset-0 pointer-events-none z-[1]" style={{ opacity: 0.03, mixBlendMode: "overlay" }}>
-        <svg width="100%" height="100%">
-          <filter id="svcNoise">
-            <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
-          </filter>
-          <rect width="100%" height="100%" filter="url(#svcNoise)" />
-        </svg>
-      </div>
-
-      {/* Vignette */}
-      <div
-        className="absolute inset-0 pointer-events-none z-[2]"
-        style={{ background: "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.35) 100%)" }}
-      />
-
-      {/* Directional fade — darker on right for card readability */}
-      <div
-        className="absolute inset-0 pointer-events-none z-[3]"
-        style={{
-          background: "linear-gradient(to right, transparent 0%, transparent 30%, rgba(0,0,0,0.25) 60%, rgba(0,0,0,0.45) 100%)",
-        }}
-      />
 
       {/* Separator accent lines */}
       <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#9900ff]/60 to-transparent z-[3]" />
@@ -1300,7 +1330,7 @@ export function Bento3Section() {
         whileInView="show"
         viewport={{ once: true, amount: 0.08 }}
         className="relative z-10 mx-auto max-w-[1440px] py-20 md:py-28"
-        style={{ paddingInline: "clamp(1rem, 4vw, 2.5rem)" }}
+        style={{ paddingInline: "clamp(1rem, 4vw, 2.5rem)", marginTop: isMobile ? 0 : '-100vh' }}
       >
         {/* Screen reader announcement */}
         <div className="sr-only" aria-live="polite" aria-atomic="true">

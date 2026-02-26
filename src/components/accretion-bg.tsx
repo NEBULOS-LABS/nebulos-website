@@ -209,13 +209,17 @@ function createProgram(
 interface AccretionBackgroundProps {
   className?: string;
   reducedMotion?: boolean;
+  offsetYRef?: React.MutableRefObject<number>;
 }
 
 export default function AccretionBackground({
   className,
   reducedMotion,
+  offsetYRef: externalOffsetYRef,
 }: AccretionBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const internalOffsetYRef = useRef(OFFSET_Y);
+  const activeOffsetYRef = externalOffsetYRef ?? internalOffsetYRef;
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   // All mutable animation / state refs (no React state to avoid re-renders)
@@ -373,7 +377,7 @@ export default function AccretionBackground({
     gl.uniform1f(u.u_speed, SPEED);
     gl.uniform1f(u.u_turbulence, TURBULENCE);
     gl.uniform1f(u.u_depth, DEPTH);
-    gl.uniform2f(u.u_offset, OFFSET_X, OFFSET_Y);
+    gl.uniform2f(u.u_offset, OFFSET_X, activeOffsetYRef.current);
 
     // Draw fullscreen quad
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -428,7 +432,7 @@ export default function AccretionBackground({
           gl.uniform1f(u.u_speed, SPEED);
           gl.uniform1f(u.u_turbulence, TURBULENCE);
           gl.uniform1f(u.u_depth, DEPTH);
-          gl.uniform2f(u.u_offset, OFFSET_X, OFFSET_Y);
+          gl.uniform2f(u.u_offset, OFFSET_X, activeOffsetYRef.current);
           gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
         }
       } else {
