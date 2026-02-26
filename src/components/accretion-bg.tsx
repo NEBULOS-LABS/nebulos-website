@@ -32,12 +32,12 @@ const vec3 MAGENTA = vec3(1.0, 0.0, 1.0);
 
 vec3 brandPalette(float t) {
   t = fract(t);
-  if (t < 0.333) {
-    return mix(CYAN, PURPLE, t * 3.0);
-  } else if (t < 0.666) {
-    return mix(PURPLE, MAGENTA, (t - 0.333) * 3.0);
+  if (t < 0.60) {
+    return mix(CYAN, PURPLE, t / 0.60);
+  } else if (t < 0.80) {
+    return mix(PURPLE, MAGENTA, (t - 0.60) / 0.20);
   } else {
-    return mix(MAGENTA, CYAN, (t - 0.666) * 3.0);
+    return mix(MAGENTA, CYAN, (t - 0.80) / 0.20);
   }
 }
 
@@ -102,12 +102,12 @@ vec3 brandPalette(float t) {
   vec3 purple  = vec3(0.6, 0.0, 1.0);
   vec3 magenta = vec3(1.0, 0.0, 1.0);
   t = fract(t);
-  if (t < 0.333) {
-    return mix(cyan, purple, t * 3.0);
-  } else if (t < 0.666) {
-    return mix(purple, magenta, (t - 0.333) * 3.0);
+  if (t < 0.60) {
+    return mix(cyan, purple, t / 0.60);
+  } else if (t < 0.80) {
+    return mix(purple, magenta, (t - 0.60) / 0.20);
   } else {
-    return mix(magenta, cyan, (t - 0.666) * 3.0);
+    return mix(magenta, cyan, (t - 0.80) / 0.20);
   }
 }
 
