@@ -650,7 +650,7 @@ function StackCard({
       onMouseLeave={!isMobile && !compressed ? () => setIsHovered(false) : undefined}
       style={{
         height: isMobile ? "auto" : undefined,
-        minHeight: isMobile ? undefined : "clamp(380px, 42vh, 520px)",
+        minHeight: isMobile ? undefined : "clamp(285px, 32vh, 390px)",
         borderRadius: compressed ? 16 : (isMobile ? 20 : 24),
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
@@ -936,6 +936,7 @@ export function Bento3Section() {
   const cursorRingRef = useRef<HTMLDivElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
   const cardNaturalHeights = useRef<number[]>([]);
+  const virtualTriggerRef = useRef<HTMLDivElement>(null);
 
   /* Keyframe injection */
   useEffect(() => {
@@ -1216,10 +1217,20 @@ export function Bento3Section() {
       };
       window.addEventListener("resize", handleResize);
 
+      /* Edge-touching compression: each card compresses exactly when the next
+         card's top edge meets the current card's bottom edge. Pixel-based
+         start/end ensure 1:1 scroll-to-compression tracking across viewports.
+         The last card uses virtualTriggerRef — an invisible "next wrapper" —
+         so it gets identical timing and avoids the sticky-failure teleport. */
       cardRefs.current.forEach((wrapper, i) => {
-        if (!wrapper || i >= SERVICES.length - 1) return;
-        const nextWrapper = cardRefs.current[i + 1];
-        if (!nextWrapper) return;
+        if (!wrapper) return;
+
+        // For the last card, use the virtual trigger; otherwise the next wrapper
+        const isLast = i === SERVICES.length - 1;
+        const triggerEl = isLast
+          ? virtualTriggerRef.current
+          : cardRefs.current[i + 1];
+        if (!triggerEl) return;
 
         const card = wrapper.querySelector(".svc-panel") as HTMLElement;
         const overlay = card?.querySelector("[data-compressed-overlay]") as HTMLElement;
@@ -1227,12 +1238,16 @@ export function Bento3Section() {
         if (!card || !overlay || !content) return;
 
         const naturalH = cardNaturalHeights.current[i] || card.offsetHeight;
+        const stickyTop = 100 + i * 76;
 
         ScrollTrigger.create({
-          trigger: nextWrapper,
-          start: "top 85%",
-          end: "top 40%",
-          scrub: 0.4,
+          trigger: triggerEl,
+          // start: next card's top touches current card's bottom
+          // end: current card fully compressed (72px), edges still touching
+          start: () => `top ${stickyTop + (cardNaturalHeights.current[i] || naturalH)}px`,
+          end: () => `top ${stickyTop + 72}px`,
+          scrub: 0.15, // tight scrub for precise edge-tracking
+          invalidateOnRefresh: true,
           onUpdate: (self) => {
             const p = self.progress;
 
@@ -1257,12 +1272,12 @@ export function Bento3Section() {
             card.style.minHeight = "0";
             card.style.overflow = "hidden";
 
-            // Content fadeout (first 60% of scrub)
-            const cp = Math.min(p / 0.6, 1);
+            // Content fadeout (first 50% of scrub — fully gone by midpoint)
+            const cp = Math.min(p / 0.5, 1);
             content.style.opacity = `${1 - cp}`;
 
-            // Bar fadein (last 40% of scrub)
-            const bp = Math.max((p - 0.6) / 0.4, 0);
+            // Bar fadein — appears only when card height ≈ overlay height (72px).
+            const bp = Math.max((p - 0.95) / 0.05, 0);
             overlay.style.opacity = `${bp}`;
             overlay.style.visibility = bp > 0.01 ? "visible" : "hidden";
           },
@@ -1276,6 +1291,17 @@ export function Bento3Section() {
           // Scrolling back into compression range — unpin to let scrub control it
           onEnterBack: () => {
             unpinCard(card, i);
+          },
+          // Scroll exited compression range backward — force full visual reset.
+          // onUpdate only fires between start/end; styles set by onLeave/pinCard
+          // survive outside that range without this explicit cleanup.
+          onLeaveBack: () => {
+            card.style.height = "";
+            card.style.minHeight = "";
+            card.style.overflow = "";
+            content.style.opacity = "1";
+            overlay.style.opacity = "0";
+            overlay.style.visibility = "hidden";
           },
         });
       });
@@ -1461,7 +1487,7 @@ export function Bento3Section() {
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, amount: 0.08 }}
-        className="relative z-10 mx-auto max-w-7xl py-20 md:py-28"
+        className="relative z-10 mx-auto max-w-[1440px] py-20 md:py-28"
         style={{ paddingInline: "clamp(1rem, 4vw, 2.5rem)" }}
       >
         {/* Screen reader announcement */}
@@ -1472,7 +1498,7 @@ export function Bento3Section() {
         </div>
 
         {/* ═══ 2-COLUMN LAYOUT (desktop) / Single column (mobile) ═══ */}
-        <div className="md:grid md:grid-cols-[minmax(240px,1fr)_minmax(0,3.5fr)] md:gap-12 lg:gap-16">
+        <div className="md:grid md:grid-cols-[minmax(220px,0.8fr)_minmax(0,4fr)] md:gap-10 lg:gap-14">
 
           {/* ═══ LEFT COLUMN — Sticky narrative anchor (left-justified) ═══ */}
           <div
@@ -1498,11 +1524,11 @@ export function Bento3Section() {
           </div>
 
           {/* ═══ RIGHT COLUMN — Scrolling cards (right-justified) ═══ */}
-          <div ref={cardsContainerRef} className={isMobile ? "w-full space-y-3 pb-16" : "relative pb-[30vh] pt-6 lg:pt-10 md:ml-auto"}>
+          <div ref={cardsContainerRef} className={isMobile ? "w-full space-y-3 pb-16" : "relative pt-6 lg:pt-10"}>
           {SERVICES.map((service, idx) => (
             <div key={service.id} ref={(el) => { cardRefs.current[idx] = el; }}
               className={isMobile ? "" : "relative"}
-              style={isMobile ? undefined : { height: idx === SERVICES.length - 1 ? "60vh" : "90vh" }}>
+              style={isMobile ? undefined : { height: "90vh" }}>
               <div style={isMobile ? undefined : {
                 position: "sticky" as const,
                 top: `${100 + idx * 76}px`,
@@ -1538,6 +1564,13 @@ export function Bento3Section() {
               </div>
             </div>
           ))}
+          {/* Virtual trigger — invisible "next card" for last card compression.
+              Same height as other wrappers so the last card gets identical
+              compression distance and edge-tracking behavior. */}
+          {!isMobile && (
+            <div ref={virtualTriggerRef} aria-hidden="true"
+              style={{ height: "90vh", pointerEvents: "none" }} />
+          )}
           </div>
         </div>
 
