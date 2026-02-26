@@ -9,6 +9,7 @@ import { useGSAP } from "@gsap/react";
 import { staggerContainer } from "@/lib/animations";
 import { Layers, Code2, Brain, Server } from "lucide-react";
 import AccretionBackground from "@/components/accretion-bg";
+import { usePointerParallax } from "@/hooks/use-pointer-parallax";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -725,6 +726,9 @@ export function Bento3Section() {
   const virtualTriggerRef = useRef<HTMLDivElement>(null);
   const dissolveSentinelRef = useRef<HTMLDivElement>(null);
   const diskOffsetYRef = useRef(0.35);
+  const depthProxyRef = useRef({ y: 0.35, dustOpacity: 0, hazeOpacity: 0, pointerInfluence: 0 });
+  const { pointerRef, isInsideRef } = usePointerParallax(outerRef, !isMobile && !reducedMotion);
+  const bgInnerRef = useRef<HTMLDivElement>(null);
 
   /* Keyframe injection */
   useEffect(() => {
@@ -921,19 +925,19 @@ export function Bento3Section() {
     { scope: sectionRef, dependencies: [reducedMotion] }
   );
 
-  /* ═══ ACCRETION DISK PARALLAX — scrub u_offset.y via sticky canvas ═══ */
+  /* ═══ ACCRETION DISK PARALLAX + DEPTH EFFECT CHOREOGRAPHY ═══ */
   useGSAP(
     () => {
       if (isMobile || reducedMotion) return;
 
-      const proxy = { y: 0.35 };
+      const proxy = depthProxyRef.current;
 
       gsap.to(proxy, {
         keyframes: {
-          "0%":   { y: 0.35 },
-          "15%":  { y: 0.10 },
-          "85%":  { y: 0.10 },
-          "100%": { y: -0.20 },
+          "0%":   { y: 0.35, dustOpacity: 0,    hazeOpacity: 0,    pointerInfluence: 0 },
+          "15%":  { y: 0.10, dustOpacity: 0.65,  hazeOpacity: 0.06, pointerInfluence: 1 },
+          "85%":  { y: 0.10, dustOpacity: 0.65,  hazeOpacity: 0.06, pointerInfluence: 1 },
+          "100%": { y: -0.20, dustOpacity: 0,    hazeOpacity: 0,    pointerInfluence: 0 },
         },
         ease: "none",
         scrollTrigger: {
@@ -1254,6 +1258,52 @@ export function Bento3Section() {
     };
   }, [isMobile, reducedMotion]);
 
+  /* ═══ POINTER PARALLAX — per-layer damped transforms ═══ */
+  useEffect(() => {
+    if (isMobile || reducedMotion) return;
+
+    const bgInner = bgInnerRef.current;
+    const headerEl = headerRef.current;
+    if (!bgInner) return;
+
+    // Far plane: heavy damping (1.2s) — the background feels massive
+    const bgX = gsap.quickTo(bgInner, "x", { duration: 1.2, ease: "power2.out" });
+    const bgY = gsap.quickTo(bgInner, "y", { duration: 1.2, ease: "power2.out" });
+    const bgRotate = gsap.quickTo(bgInner, "rotation", { duration: 1.4, ease: "power2.out" });
+
+    // Headline: very light response (0.8s)
+    let headX: gsap.QuickToFunc | null = null;
+    let headY: gsap.QuickToFunc | null = null;
+    if (headerEl) {
+      headX = gsap.quickTo(headerEl, "x", { duration: 0.8, ease: "power2.out" });
+      headY = gsap.quickTo(headerEl, "y", { duration: 0.8, ease: "power2.out" });
+    }
+
+    let rafId = 0;
+
+    const tick = () => {
+      const { nx, ny } = pointerRef.current;
+      const influence = depthProxyRef.current.pointerInfluence;
+
+      // Far plane: translate 24px x, 18px y, rotate 0.5deg
+      bgX(nx * 24 * influence);
+      bgY(ny * 18 * influence);
+      bgRotate(nx * 0.5 * influence);
+
+      // Headline: translate 4px max
+      if (headX && headY) {
+        headX(nx * 4 * influence);
+        headY(ny * 3 * influence);
+      }
+
+      rafId = requestAnimationFrame(tick);
+    };
+
+    rafId = requestAnimationFrame(tick);
+
+    return () => cancelAnimationFrame(rafId);
+  }, [isMobile, reducedMotion]);
+
   /* Handlers */
   const handleCheckpointClick = useCallback((index: number) => {
     const card = cardRefs.current[index];
@@ -1268,31 +1318,33 @@ export function Bento3Section() {
     <div ref={outerRef} className="relative w-full bg-black text-gray-300" id="services">
       {/* Background layers — sticky on desktop (parallax), absolute on mobile */}
       <div className={`${isMobile ? 'absolute inset-0' : 'sticky top-0 h-screen w-full'} overflow-hidden pointer-events-none z-0`}>
-        <AccretionBackground reducedMotion={reducedMotion} offsetYRef={diskOffsetYRef} />
+        <div ref={bgInnerRef} className="absolute inset-0" style={{ willChange: isMobile ? 'auto' : 'transform' }}>
+          <AccretionBackground reducedMotion={reducedMotion} offsetYRef={diskOffsetYRef} />
 
-        {/* Noise grain overlay */}
-        <div className="absolute inset-0 pointer-events-none z-[1]" style={{ opacity: 0.03, mixBlendMode: "overlay" }}>
-          <svg width="100%" height="100%">
-            <filter id="svcNoise">
-              <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
-            </filter>
-            <rect width="100%" height="100%" filter="url(#svcNoise)" />
-          </svg>
+          {/* Noise grain overlay */}
+          <div className="absolute inset-0 pointer-events-none z-[1]" style={{ opacity: 0.03, mixBlendMode: "overlay" }}>
+            <svg width="100%" height="100%">
+              <filter id="svcNoise">
+                <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
+              </filter>
+              <rect width="100%" height="100%" filter="url(#svcNoise)" />
+            </svg>
+          </div>
+
+          {/* Vignette */}
+          <div
+            className="absolute inset-0 pointer-events-none z-[2]"
+            style={{ background: "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.35) 100%)" }}
+          />
+
+          {/* Directional fade — darker on right for card readability */}
+          <div
+            className="absolute inset-0 pointer-events-none z-[3]"
+            style={{
+              background: "linear-gradient(to right, transparent 0%, transparent 30%, rgba(0,0,0,0.25) 60%, rgba(0,0,0,0.45) 100%)",
+            }}
+          />
         </div>
-
-        {/* Vignette */}
-        <div
-          className="absolute inset-0 pointer-events-none z-[2]"
-          style={{ background: "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.35) 100%)" }}
-        />
-
-        {/* Directional fade — darker on right for card readability */}
-        <div
-          className="absolute inset-0 pointer-events-none z-[3]"
-          style={{
-            background: "linear-gradient(to right, transparent 0%, transparent 30%, rgba(0,0,0,0.25) 60%, rgba(0,0,0,0.45) 100%)",
-          }}
-        />
       </div>
 
       {/* Separator accent lines */}
