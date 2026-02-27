@@ -1713,7 +1713,7 @@ export function Bento3Section() {
               {/* Shimmer highlight — sweeps across on hover */}
               <div data-shimmer className="absolute inset-0 pointer-events-none"
                 style={{
-                  background: "linear-gradient(90deg, transparent 0%, rgba(0,238,255,0.08) 40%, rgba(255,255,255,0.25) 50%, rgba(0,238,255,0.08) 60%, transparent 100%)",
+                  background: "linear-gradient(90deg, transparent 0%, rgba(0,238,255,0.25) 35%, rgba(255,255,255,0.7) 50%, rgba(0,238,255,0.25) 65%, transparent 100%)",
                   transform: "translateX(-100%)",
                 }}
               />
