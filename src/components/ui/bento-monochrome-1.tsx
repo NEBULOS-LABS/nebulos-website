@@ -1680,12 +1680,14 @@ export function Bento3Section() {
 
             {/* White CTA with gradient border + shimmer sweep */}
             <a href="#contact"
-              className="group/cta relative inline-flex items-center px-10 py-4 text-sm font-bold text-black uppercase tracking-wider rounded-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#00eeff]/50 focus:ring-offset-2 focus:ring-offset-black"
+              className="group/cta relative inline-flex items-center px-10 py-4 text-sm font-bold text-white uppercase tracking-wider rounded-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#00eeff]/50 focus:ring-offset-2 focus:ring-offset-black"
               style={{
                 border: "3px solid transparent",
                 backgroundOrigin: "border-box",
                 backgroundClip: "padding-box, border-box",
-                backgroundImage: "linear-gradient(to right, white, white), linear-gradient(to right, #00eeff, #ff00ff, #9900ff)",
+                backgroundImage: "linear-gradient(to right, rgba(12,12,20,0.75), rgba(12,12,20,0.75)), linear-gradient(to right, #00eeff, #ff00ff, #9900ff)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
                 boxShadow: "0 4px 20px rgba(0,0,0,0.15), 0 0 20px rgba(0,238,255,0.3), 0 0 50px rgba(153,0,255,0.15), 0 0 80px rgba(0,238,255,0.08)",
                 transition: "box-shadow 400ms cubic-bezier(0.16, 1, 0.3, 1), transform 400ms cubic-bezier(0.16, 1, 0.3, 1)",
               }}
