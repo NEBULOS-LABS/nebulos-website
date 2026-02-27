@@ -1678,18 +1678,46 @@ export function Bento3Section() {
               <div className="flex-1 h-[1px]" style={{ background: "linear-gradient(to left, transparent, rgba(0,238,255,0.3))" }} />
             </div>
 
-            {/* Gradient-bordered CTA button */}
+            {/* White CTA with gradient border + shimmer sweep */}
             <a href="#contact"
-              className="inline-flex items-center px-10 py-4 text-sm font-semibold text-white uppercase tracking-wider rounded-full hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#00eeff]/50 focus:ring-offset-2 focus:ring-offset-black"
+              className="group/cta relative inline-flex items-center px-10 py-4 text-sm font-bold text-black uppercase tracking-wider rounded-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#00eeff]/50 focus:ring-offset-2 focus:ring-offset-black"
               style={{
-                border: "1px solid rgba(255,255,255,0.15)",
+                border: "2px solid transparent",
                 backgroundOrigin: "border-box",
                 backgroundClip: "padding-box, border-box",
-                backgroundImage: "linear-gradient(to right, rgba(0,0,0,0.6), rgba(0,0,0,0.6)), linear-gradient(to right, #00eeff, #ff00ff, #9900ff)",
-                boxShadow: "0 0 25px rgba(0,238,255,0.15), 0 0 50px rgba(153,0,255,0.08)",
-                transition: "all 400ms cubic-bezier(0.16, 1, 0.3, 1)",
-              }}>
-              Start a Conversation
+                backgroundImage: "linear-gradient(to right, white, white), linear-gradient(to right, #00eeff, #ff00ff, #9900ff)",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.15), 0 0 30px rgba(0,238,255,0.1)",
+                transition: "box-shadow 400ms cubic-bezier(0.16, 1, 0.3, 1), transform 400ms cubic-bezier(0.16, 1, 0.3, 1)",
+              }}
+              onMouseEnter={!isMobile ? (e) => {
+                const shimmer = e.currentTarget.querySelector<HTMLElement>("[data-shimmer]");
+                if (shimmer) {
+                  gsap.fromTo(shimmer, { x: "-100%" }, { x: "200%", duration: 0.6, ease: "power2.inOut" });
+                }
+                gsap.to(e.currentTarget, {
+                  scale: 1.04,
+                  boxShadow: "0 6px 28px rgba(0,0,0,0.2), 0 0 40px rgba(0,238,255,0.2), 0 0 80px rgba(153,0,255,0.1)",
+                  duration: 0.4,
+                  ease: "power2.out",
+                });
+              } : undefined}
+              onMouseLeave={!isMobile ? (e) => {
+                gsap.to(e.currentTarget, {
+                  scale: 1,
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.15), 0 0 30px rgba(0,238,255,0.1)",
+                  duration: 0.5,
+                  ease: "power2.out",
+                });
+              } : undefined}
+            >
+              {/* Shimmer highlight — sweeps across on hover */}
+              <div data-shimmer className="absolute inset-0 pointer-events-none"
+                style={{
+                  background: "linear-gradient(90deg, transparent 0%, rgba(0,238,255,0.08) 40%, rgba(255,255,255,0.25) 50%, rgba(0,238,255,0.08) 60%, transparent 100%)",
+                  transform: "translateX(-100%)",
+                }}
+              />
+              <span className="relative z-10">Start a Conversation</span>
             </a>
           </div>
         </div>
