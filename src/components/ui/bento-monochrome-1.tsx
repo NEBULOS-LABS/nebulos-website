@@ -132,7 +132,6 @@ const KEYFRAME_CSS = [
   ".svc-panel:focus-visible{outline:2px solid #00eeff;outline-offset:2px;border-radius:20px}",
   "@keyframes progressGlow{0%,100%{box-shadow:0 0 8px rgba(0,238,255,0.2)}50%{box-shadow:0 0 20px rgba(0,238,255,0.4),0 0 6px rgba(255,0,255,0.15)}}",
   "@keyframes hazeRotate{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}",
-  "@keyframes liquidSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}",
 ].join("\n");
 
 /* ─────────────── Micro-Animated Visuals (Memoized) ─────────────── */
@@ -1657,15 +1656,13 @@ export function Bento3Section() {
             {METRICS.map((m) => (
               <div key={m.label} className="group flex flex-col items-center gap-1.5 rounded-xl px-5 py-5 relative overflow-hidden"
                 style={{
-                  background: "rgba(10, 10, 20, 0.6)",
-                  backdropFilter: "blur(8px)",
-                  WebkitBackdropFilter: "blur(8px)",
-                  border: `1px solid color-mix(in srgb, ${m.accent} 20%, transparent)`,
-                  boxShadow: `inset 0 1px 20px color-mix(in srgb, ${m.accent} 10%, transparent), 0 4px 20px rgba(0,0,0,0.3)`,
+                  background: `color-mix(in srgb, ${m.accent} 4%, transparent)`,
+                  border: `1px solid color-mix(in srgb, ${m.accent} 12%, transparent)`,
+                  boxShadow: `inset 0 1px 20px color-mix(in srgb, ${m.accent} 6%, transparent)`,
                   transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
                 }}>
                 {/* Top accent stripe */}
-                <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: m.accent, opacity: 0.7 }} />
+                <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: m.accent, opacity: 0.5 }} />
                 <span className="text-xl md:text-2xl font-semibold" style={{ color: m.accent }}>{m.value}</span>
                 <span className="text-[10px] uppercase tracking-[0.2em] text-gray-500 text-center">{m.label}</span>
               </div>
@@ -1681,36 +1678,19 @@ export function Bento3Section() {
               <div className="flex-1 h-[1px]" style={{ background: "linear-gradient(to left, transparent, rgba(0,238,255,0.3))" }} />
             </div>
 
-            {/* Liquid metal CTA button */}
-            <div className="relative rounded-full group" style={{ padding: 2 }}>
-              {/* Chromatic aberration glow — blurred spinning gradient with color-offset shadows */}
-              <div className="absolute rounded-full opacity-40 group-hover:opacity-60 pointer-events-none"
-                style={{
-                  inset: -4,
-                  background: "conic-gradient(from 0deg, #00eeff 0deg, #9900ff 90deg, #ff00ff 180deg, #00eeff 240deg, rgba(255,255,255,0.85) 300deg, #00eeff 360deg)",
-                  animation: "liquidSpin 4s linear infinite",
-                  filter: "blur(8px)",
-                  boxShadow: "2px 0 12px rgba(255,50,100,0.2), -2px 0 12px rgba(0,150,255,0.25)",
-                  transition: "opacity 400ms ease",
-                }}
-              />
-              {/* Sharp spinning border — the liquid metal surface */}
-              <div className="absolute inset-[-1px] rounded-full pointer-events-none"
-                style={{
-                  background: "conic-gradient(from 0deg, #00eeff 0deg, #9900ff 90deg, #ff00ff 180deg, #00eeff 240deg, rgba(255,255,255,0.85) 300deg, #00eeff 360deg)",
-                  animation: "liquidSpin 4s linear infinite",
-                }}
-              />
-              {/* Inner button surface */}
-              <a href="#contact"
-                className="relative z-10 inline-flex items-center px-10 py-4 text-sm font-semibold text-white uppercase tracking-wider rounded-full hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#00eeff]/50 focus:ring-offset-2 focus:ring-offset-black"
-                style={{
-                  background: "rgba(8, 8, 14, 0.92)",
-                  transition: "all 400ms cubic-bezier(0.16, 1, 0.3, 1)",
-                }}>
-                Start a Conversation
-              </a>
-            </div>
+            {/* Gradient-bordered CTA button */}
+            <a href="#contact"
+              className="inline-flex items-center px-10 py-4 text-sm font-semibold text-white uppercase tracking-wider rounded-full hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#00eeff]/50 focus:ring-offset-2 focus:ring-offset-black"
+              style={{
+                border: "1px solid rgba(255,255,255,0.15)",
+                backgroundOrigin: "border-box",
+                backgroundClip: "padding-box, border-box",
+                backgroundImage: "linear-gradient(to right, rgba(0,0,0,0.6), rgba(0,0,0,0.6)), linear-gradient(to right, #00eeff, #ff00ff, #9900ff)",
+                boxShadow: "0 0 25px rgba(0,238,255,0.15), 0 0 50px rgba(153,0,255,0.08)",
+                transition: "all 400ms cubic-bezier(0.16, 1, 0.3, 1)",
+              }}>
+              Start a Conversation
+            </a>
           </div>
         </div>
       {/* Dissolve sentinel — fixed-height marker whose position is NOT
