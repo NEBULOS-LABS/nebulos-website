@@ -1681,8 +1681,38 @@ export function Bento3Section() {
               <div className="flex-1 h-[1px]" style={{ background: "linear-gradient(to left, transparent, rgba(0,238,255,0.3))" }} />
             </div>
 
-            {/* Liquid metal CTA button */}
-            <div className="relative rounded-full group" style={{ padding: 2 }}>
+            {/* Liquid metal CTA button — magnetic hover + 3D tilt via GSAP */}
+            <div
+              className="relative rounded-full group"
+              style={{ padding: 2, perspective: 800 }}
+              onMouseMove={!isMobile ? (e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                gsap.to(e.currentTarget, {
+                  x: x * 0.3,
+                  y: y * 0.3,
+                  rotateX: -y * 0.15,
+                  rotateY: x * 0.15,
+                  scale: 1.05,
+                  duration: 0.4,
+                  ease: "power2.out",
+                });
+              } : undefined}
+              onMouseLeave={!isMobile ? (e) => {
+                gsap.to(e.currentTarget, {
+                  x: 0, y: 0, rotateX: 0, rotateY: 0, scale: 1,
+                  duration: 0.7,
+                  ease: "elastic.out(1, 0.3)",
+                });
+              } : undefined}
+              onMouseDown={!isMobile ? (e) => {
+                gsap.to(e.currentTarget, { scale: 0.95, duration: 0.15 });
+              } : undefined}
+              onMouseUp={!isMobile ? (e) => {
+                gsap.to(e.currentTarget, { scale: 1.05, duration: 0.4, ease: "elastic.out(1, 0.4)" });
+              } : undefined}
+            >
               {/* Chromatic aberration glow — blurred spinning gradient with color-offset shadows */}
               <div className="absolute rounded-full opacity-40 group-hover:opacity-60 pointer-events-none"
                 style={{
@@ -1701,12 +1731,12 @@ export function Bento3Section() {
                   animation: "liquidSpin 4s linear infinite",
                 }}
               />
-              {/* Inner button surface */}
+              {/* Inner button — white pill */}
               <a href="#contact"
-                className="relative z-10 inline-flex items-center px-10 py-4 text-sm font-semibold text-white uppercase tracking-wider rounded-full hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#00eeff]/50 focus:ring-offset-2 focus:ring-offset-black"
+                className="relative z-10 inline-flex items-center px-10 py-4 text-sm font-bold text-black uppercase tracking-wider rounded-full focus:outline-none focus:ring-2 focus:ring-[#00eeff]/50 focus:ring-offset-2 focus:ring-offset-black"
                 style={{
-                  background: "rgba(8, 8, 14, 0.92)",
-                  transition: "all 400ms cubic-bezier(0.16, 1, 0.3, 1)",
+                  background: "white",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                 }}>
                 Start a Conversation
               </a>
