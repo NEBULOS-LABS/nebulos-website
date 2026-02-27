@@ -112,9 +112,9 @@ const SERVICES: ServicePanel[] = [
 ];
 
 const METRICS = [
-  { label: "Active Deployments", value: "250+" },
-  { label: "Client Satisfaction", value: "99%" },
-  { label: "Lines Shipped", value: "10M+" },
+  { label: "Active Deployments", value: "250+", accent: "#00eeff" },
+  { label: "Client Satisfaction", value: "99%", accent: "#ff00ff" },
+  { label: "Lines Shipped", value: "10M+", accent: "#9900ff" },
 ];
 
 const iconMap: Record<string, typeof Layers> = { Layers, Code2, Brain, Server };
@@ -983,15 +983,15 @@ export function Bento3Section() {
     () => {
       if (!footerRef.current || reducedMotion) return;
       const children = footerRef.current.children;
-      gsap.set(children, { opacity: 0, y: 30, filter: "blur(4px)" });
+      gsap.set(children, { opacity: 0, y: 30, scale: 0.92, filter: "blur(6px)" });
       ScrollTrigger.create({
         trigger: footerRef.current,
         start: "top 85%",
         once: true,
         onEnter: () => {
           gsap.to(children, {
-            opacity: 1, y: 0, filter: "blur(0px)",
-            duration: 0.7, stagger: 0.12, ease: "power3.out",
+            opacity: 1, y: 0, scale: 1, filter: "blur(0px)",
+            duration: 0.8, stagger: 0.15, ease: "power3.out",
           });
         },
       });
@@ -1642,20 +1642,53 @@ export function Bento3Section() {
 
         {/* ═══ FOOTER — Metrics + CTA ═══ */}
         <div ref={footerRef} className="relative z-10 flex flex-col items-center gap-10 pb-20 md:pb-28">
-          <div className="grid grid-cols-3 gap-4 w-full max-w-lg">
+          {/* Gradient separator — threshold between cards and conclusion */}
+          <div className="w-2/5 mb-2 md:mb-4"
+            style={{
+              height: 1,
+              background: "linear-gradient(to right, transparent, rgba(0,238,255,0.4), transparent)",
+              boxShadow: "0 0 15px rgba(0,238,255,0.15)",
+            }}
+          />
+
+          {/* Color-coded metrics grid */}
+          <div className="grid grid-cols-3 gap-4 w-full max-w-xl">
             {METRICS.map((m) => (
-              <div key={m.label} className="flex flex-col items-center gap-1 rounded-xl px-4 py-4"
-                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                <span className="text-xl md:text-2xl font-semibold text-white">{m.value}</span>
+              <div key={m.label} className="group flex flex-col items-center gap-1.5 rounded-xl px-5 py-5 relative overflow-hidden"
+                style={{
+                  background: `color-mix(in srgb, ${m.accent} 4%, transparent)`,
+                  border: `1px solid color-mix(in srgb, ${m.accent} 12%, transparent)`,
+                  boxShadow: `inset 0 1px 20px color-mix(in srgb, ${m.accent} 6%, transparent)`,
+                  transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
+                }}>
+                {/* Top accent stripe */}
+                <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: m.accent, opacity: 0.5 }} />
+                <span className="text-xl md:text-2xl font-semibold" style={{ color: m.accent }}>{m.value}</span>
                 <span className="text-[10px] uppercase tracking-[0.2em] text-gray-500 text-center">{m.label}</span>
               </div>
             ))}
           </div>
-          <div className="flex flex-col items-center gap-3">
-            <span className="text-xs uppercase tracking-[0.35em] text-[#00eeff]">Need something custom?</span>
+
+          {/* CTA section */}
+          <div className="flex flex-col items-center gap-5 w-full max-w-xl">
+            {/* Label with flanking gradient lines */}
+            <div className="flex items-center gap-4 w-full">
+              <div className="flex-1 h-[1px]" style={{ background: "linear-gradient(to right, transparent, rgba(0,238,255,0.3))" }} />
+              <span className="text-xs uppercase tracking-[0.35em] text-[#00eeff] whitespace-nowrap">Need something custom?</span>
+              <div className="flex-1 h-[1px]" style={{ background: "linear-gradient(to left, transparent, rgba(0,238,255,0.3))" }} />
+            </div>
+
+            {/* Gradient-bordered CTA button */}
             <a href="#contact"
-              className="inline-flex items-center px-8 py-3.5 bg-white text-black text-sm font-bold uppercase tracking-wider rounded-full hover:bg-gray-200 hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
-              style={{ transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)" }}>
+              className="inline-flex items-center px-10 py-4 text-sm font-semibold text-white uppercase tracking-wider rounded-full hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#00eeff]/50 focus:ring-offset-2 focus:ring-offset-black"
+              style={{
+                border: "1px solid rgba(255,255,255,0.15)",
+                backgroundOrigin: "border-box",
+                backgroundClip: "padding-box, border-box",
+                backgroundImage: "linear-gradient(to right, rgba(0,0,0,0.6), rgba(0,0,0,0.6)), linear-gradient(to right, #00eeff, #ff00ff, #9900ff)",
+                boxShadow: "0 0 25px rgba(0,238,255,0.15), 0 0 50px rgba(153,0,255,0.08)",
+                transition: "all 400ms cubic-bezier(0.16, 1, 0.3, 1)",
+              }}>
               Start a Conversation
             </a>
           </div>
