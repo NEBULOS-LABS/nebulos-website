@@ -29,7 +29,7 @@ uniform float u_mouse_prox;
 /* ── Brand Palette ───────────────────────────────────────────────────── */
 
 const vec3 CYAN    = vec3(0.0, 0.933, 1.0);
-const vec3 PURPLE  = vec3(0.6, 0.0, 1.0);
+const vec3 PURPLE  = vec3(0.65, 0.1, 1.0);
 const vec3 MAGENTA = vec3(1.0, 0.0, 1.0);
 
 vec3 brandPalette(float t) {
@@ -74,7 +74,7 @@ void main() {
     O.rgb += col / d * u_brightness;
   }
 
-  O = tanhApprox(O * O / 400.0);
+  O = tanhApprox(O * O / 220.0);
 
   fragColor = O;
 }
@@ -104,7 +104,7 @@ uniform float u_mouse_prox;
 
 vec3 brandPalette(float t) {
   vec3 cyan    = vec3(0.0, 0.933, 1.0);
-  vec3 purple  = vec3(0.6, 0.0, 1.0);
+  vec3 purple  = vec3(0.65, 0.1, 1.0);
   vec3 magenta = vec3(1.0, 0.0, 1.0);
   t = fract(t);
   if (t < 0.60) {
@@ -143,7 +143,7 @@ void main() {
     O.rgb += col / d * u_brightness;
   }
 
-  O = tanhApprox(O * O / 400.0);
+  O = tanhApprox(O * O / 220.0);
 
   gl_FragColor = O;
 }
@@ -152,9 +152,9 @@ void main() {
 /* ─── Constants ───────────────────────────────────────────────────────── */
 
 const CSS_FALLBACK_GRADIENT =
-  "radial-gradient(ellipse at 35% 45%, rgba(0,238,255,0.10) 0%, rgba(153,0,255,0.06) 30%, rgba(255,0,255,0.03) 50%, rgba(5,5,5,1) 70%)";
+  "radial-gradient(ellipse at 35% 45%, rgba(0,238,255,0.18) 0%, rgba(153,0,255,0.10) 30%, rgba(255,0,255,0.05) 50%, rgba(5,5,5,1) 70%)";
 
-const BRIGHTNESS = 0.5;
+const BRIGHTNESS = 0.85;
 const SPEED = 0.8;
 const TURBULENCE = 0.8;
 const DEPTH = 1.0;
