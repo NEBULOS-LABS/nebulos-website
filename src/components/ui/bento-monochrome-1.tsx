@@ -1682,11 +1682,11 @@ export function Bento3Section() {
             <a href="#contact"
               className="group/cta relative inline-flex items-center px-10 py-4 text-sm font-bold text-black uppercase tracking-wider rounded-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#00eeff]/50 focus:ring-offset-2 focus:ring-offset-black"
               style={{
-                border: "2px solid transparent",
+                border: "3px solid transparent",
                 backgroundOrigin: "border-box",
                 backgroundClip: "padding-box, border-box",
                 backgroundImage: "linear-gradient(to right, white, white), linear-gradient(to right, #00eeff, #ff00ff, #9900ff)",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.15), 0 0 30px rgba(0,238,255,0.1)",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.15), 0 0 20px rgba(0,238,255,0.3), 0 0 50px rgba(153,0,255,0.15), 0 0 80px rgba(0,238,255,0.08)",
                 transition: "box-shadow 400ms cubic-bezier(0.16, 1, 0.3, 1), transform 400ms cubic-bezier(0.16, 1, 0.3, 1)",
               }}
               onMouseEnter={!isMobile ? (e) => {
@@ -1696,7 +1696,7 @@ export function Bento3Section() {
                 }
                 gsap.to(e.currentTarget, {
                   scale: 1.04,
-                  boxShadow: "0 6px 28px rgba(0,0,0,0.2), 0 0 40px rgba(0,238,255,0.2), 0 0 80px rgba(153,0,255,0.1)",
+                  boxShadow: "0 6px 28px rgba(0,0,0,0.2), 0 0 30px rgba(0,238,255,0.45), 0 0 60px rgba(153,0,255,0.25), 0 0 100px rgba(0,238,255,0.12)",
                   duration: 0.4,
                   ease: "power2.out",
                 });
@@ -1704,7 +1704,7 @@ export function Bento3Section() {
               onMouseLeave={!isMobile ? (e) => {
                 gsap.to(e.currentTarget, {
                   scale: 1,
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.15), 0 0 30px rgba(0,238,255,0.1)",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.15), 0 0 20px rgba(0,238,255,0.3), 0 0 50px rgba(153,0,255,0.15), 0 0 80px rgba(0,238,255,0.08)",
                   duration: 0.5,
                   ease: "power2.out",
                 });
