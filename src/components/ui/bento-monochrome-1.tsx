@@ -1717,7 +1717,7 @@ export function Bento3Section() {
                   transform: "translateX(-100%)",
                 }}
               />
-              <span className="relative z-10">Start a Conversation</span>
+              <span className="relative z-10">Let&apos;s Talk</span>
             </a>
           </div>
         </div>
