@@ -12,7 +12,13 @@ const nextConfig = {
       },
     ],
   },
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, dev }) => {
+    // WSL2 filesystem race conditions corrupt webpack's pack file cache.
+    // Memory cache eliminates all ENOENT rename / deserialization errors.
+    if (dev) {
+      config.cache = { type: "memory" };
+    }
+
     // Paper.js ships with Node.js-specific files (dist/node/*) that pull in
     // jsdom, canvas, source-map-support, fs, etc. via static require() calls.
     // These are only needed for headless Node.js rendering with node-canvas
