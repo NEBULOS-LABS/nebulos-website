@@ -1656,9 +1656,11 @@ export function Bento3Section() {
             {METRICS.map((m) => (
               <div key={m.label} className="group flex flex-col items-center gap-1.5 rounded-xl px-5 py-5 relative overflow-hidden"
                 style={{
-                  background: `color-mix(in srgb, ${m.accent} 4%, transparent)`,
-                  border: `1px solid color-mix(in srgb, ${m.accent} 12%, transparent)`,
-                  boxShadow: `inset 0 1px 20px color-mix(in srgb, ${m.accent} 6%, transparent)`,
+                  background: `color-mix(in srgb, ${m.accent} 6%, rgba(12, 12, 20, 0.45))`,
+                  backdropFilter: "blur(10px)",
+                  WebkitBackdropFilter: "blur(10px)",
+                  border: `1px solid color-mix(in srgb, ${m.accent} 18%, transparent)`,
+                  boxShadow: `inset 0 1px 20px color-mix(in srgb, ${m.accent} 8%, transparent), 0 4px 16px rgba(0,0,0,0.2)`,
                   transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
                 }}>
                 {/* Top accent stripe */}
@@ -1680,7 +1682,7 @@ export function Bento3Section() {
 
             {/* White CTA with gradient border + shimmer sweep */}
             <a href="#contact"
-              className="group/cta relative inline-flex items-center px-10 py-4 text-sm font-bold text-black uppercase tracking-wider rounded-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#00eeff]/50 focus:ring-offset-2 focus:ring-offset-black"
+              className="group/cta relative inline-flex items-center px-10 py-4 text-sm font-bold text-black tracking-wide rounded-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#00eeff]/50 focus:ring-offset-2 focus:ring-offset-black"
               style={{
                 border: "3px solid transparent",
                 backgroundOrigin: "border-box",
