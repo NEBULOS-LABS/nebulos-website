@@ -58,8 +58,8 @@ uniform float uFade;
 #define FLOW_SHARPNESS 1.5
 
 // Wisps (animated micro-streaks) that travel along the beam
-#define W_BASE_X 0.7595
-#define W_LAYER_GAP 0.1266
+#define W_BASE_X 0.7975
+#define W_LAYER_GAP 0.1329
 #define W_LANES 10
 #define W_SIDE_DECAY 0.5
 #define W_HALF 0.01
