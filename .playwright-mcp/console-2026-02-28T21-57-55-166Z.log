@@ -1,0 +1,4 @@
+[    2080ms] [WARNING] [.WebGL-0x3e4c0011ca00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels @ https://reactbits.dev/animations/laser-flow:0
+[    2198ms] [WARNING] [.WebGL-0x3e4c0011ca00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels @ https://reactbits.dev/animations/laser-flow:0
+[    2343ms] [WARNING] [.WebGL-0x3e4c0011ca00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels @ https://reactbits.dev/animations/laser-flow:0
+[    2455ms] [WARNING] [.WebGL-0x3e4c0011ca00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) @ https://reactbits.dev/animations/laser-flow:0

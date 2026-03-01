@@ -58,8 +58,8 @@ uniform float uFade;
 #define FLOW_SHARPNESS 1.5
 
 // Wisps (animated micro-streaks) that travel along the beam
-#define W_BASE_X 1.5
-#define W_LAYER_GAP 0.25
+#define W_BASE_X 0.7595
+#define W_LAYER_GAP 0.1266
 #define W_LANES 10
 #define W_SIDE_DECAY 0.5
 #define W_HALF 0.01
@@ -102,6 +102,28 @@ uniform float uFade;
 #define EDGE_LUMA_T0 0.0
 #define EDGE_LUMA_T1 2.0
 #define DITHER_STRENGTH 1.0
+
+/* ── Brand Palette (matches accretion disk) ── */
+const vec3 BP_CYAN    = vec3(0.0, 0.933, 1.0);
+const vec3 BP_PURPLE  = vec3(0.65, 0.1, 1.0);
+const vec3 BP_MAGENTA = vec3(1.0, 0.0, 1.0);
+
+vec3 brandPalette(float t) {
+  t = fract(t);
+  if (t < 0.60) {
+    return mix(BP_CYAN, BP_PURPLE, t / 0.60);
+  } else if (t < 0.80) {
+    return mix(BP_PURPLE, BP_MAGENTA, (t - 0.60) / 0.20);
+  } else {
+    return mix(BP_MAGENTA, BP_CYAN, (t - 0.80) / 0.20);
+  }
+}
+
+/* ── HDR Tone Mapping (from accretion disk) ── */
+vec3 tanhApprox3(vec3 x) {
+  vec3 x2 = x * x;
+  return x * (3.0 + x2) / (3.0 + 3.0 * x2);
+}
 
     float g(float x){return x<=0.00031308?12.92*x:1.055*pow(x,1.0/2.4)-0.055;}
     float bs(vec2 p,vec2 q,float powr){
@@ -220,9 +242,39 @@ void mainImage(out vec4 fc,in vec2 frag){
 #endif
     float LF=L+fog;
     float dith=(h21(frag)-0.5)*(DITHER_STRENGTH/255.0);
-    float tone=g(LF+w);
-    vec3 col=tone*uColor+dith;
-    float alpha=clamp(g(L+w*0.6)+dith*0.6,0.0,1.0);
+
+    /* ── Directional spatial phase (gradient along beam) ── */
+    float yPhase=clamp(uvc.y/(R_V*uVLenFactor*0.4),0.0,1.0);
+    float xPhase=clamp(abs(uvc.x)/(R_H*uHLenFactor),0.0,1.0);
+    float bPhase=max(yPhase,xPhase)*0.9;
+
+    /* ── Time-animated phase shift (like accretion disk) ── */
+    float tShift=uFlowTime*0.06;
+
+    /* ── Multi-sample additive accumulation ──
+       Replicates accretion disk: phase = (p.x + i*0.4 + z) * 0.15
+       Each sample hits a different palette position → rich color blend per pixel */
+    vec3 O=vec3(0.0);
+    float beamBri=L+max(0.0,w)*0.5;
+    float fogBri=fog;
+
+    /* Beam: 5 samples at staggered phases (like accretion disk's i*0.4 offset) */
+    for(float i=0.0;i<5.0;i++){
+      float phase=bPhase+i*0.15+tShift+beamBri*0.1;
+      vec3 c=brandPalette(phase);
+      O+=c*beamBri/(1.0+i*0.4);
+    }
+
+    /* Fog: 3 samples phase-shifted from beam (different color in fog vs core) */
+    for(float i=0.0;i<3.0;i++){
+      float phase=bPhase+0.35+i*0.12+tShift*0.7;
+      vec3 c=brandPalette(phase);
+      O+=c*fogBri*0.5/(1.0+i*0.5);
+    }
+
+    /* ── HDR tone mapping (matching accretion disk's tanhApprox(O*O/220.0)) ── */
+    vec3 col=tanhApprox3(O*O/10.0)+dith;
+    float alpha=clamp(g(L+fog*0.4+w*0.6)+dith*0.6,0.0,1.0);
     float nxE=abs((frag.x-C.x)*invW),xF=pow(clamp(1.0-smoothstep(EDGE_X0,EDGE_X1,nxE),0.0,1.0),EDGE_X_GAMMA);
     float scene=LF+max(0.0,w)*0.5,hi=smoothstep(EDGE_LUMA_T0,EDGE_LUMA_T1,scene);
     float eM=mix(xF,1.0,hi);

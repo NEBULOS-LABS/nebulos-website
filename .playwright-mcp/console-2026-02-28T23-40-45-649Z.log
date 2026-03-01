@@ -1,0 +1,151 @@
+[    3292ms] [WARNING] Please ensure that the container has a non-static position, like 'relative', 'fixed', or 'absolute' to ensure scroll offset is calculated correctly. @ webpack-internal:///(app-pages-browser)/./node_modules/framer-motion/dist/es/utils/warn-once.mjs:7
+[    5313ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/favicon.ico:0
+[    5321ms] [WARNING] [.WebGL-0x1ac400117000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels @ http://localhost:3000/#contact:0
+[    5330ms] [WARNING] [.WebGL-0x1ac400117000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels @ http://localhost:3000/#contact:0
+[    5474ms] [WARNING] Image with src "/images/image_of_keys.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/shared/lib/utils/warn-once.js:15
+[    5474ms] [WARNING] Image with src "/images/open_box_image.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/shared/lib/utils/warn-once.js:15
+[    5604ms] [WARNING] Image with src "/images/scissors_cutting_ribbons_cool_image.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/shared/lib/utils/warn-once.js:15
+[  130699ms] [WARNING] [.WebGL-0x1ac40011b800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels @ http://localhost:3000/#contact:0
+[  130827ms] [WARNING] [.WebGL-0x1ac40011b800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) @ http://localhost:3000/#contact:0
+[  673301ms] [ERROR] ./src/components/contact.tsx
+Error: 
+  x Unexpected token `section`. Expected jsx identifier
+    ,-[/home/asaadabbas/Projects/nebulos-website/src/components/contact.tsx:81:1]
+ 81 |   };
+ 82 | 
+ 83 |   return (
+ 84 |     <section
+    :      ^^^^^^^
+ 85 |       id="contact"
+ 86 |       className="relative bg-black pt-20 lg:pt-32 pb-10 lg:pb-16"
+ 87 |     >
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/contact.tsx
+./src/app/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:34
+[  673818ms] [ERROR] ./src/components/contact.tsx
+Error: 
+  x Unexpected token `section`. Expected jsx identifier
+    ,-[/home/asaadabbas/Projects/nebulos-website/src/components/contact.tsx:81:1]
+ 81 |   };
+ 82 | 
+ 83 |   return (
+ 84 |     <section
+    :      ^^^^^^^
+ 85 |       id="contact"
+ 86 |       className="relative bg-black pt-20 lg:pt-32 pb-10 lg:pb-16"
+ 87 |     >
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/contact.tsx
+./src/app/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:34
+[  696483ms] [ERROR] ./src/components/contact.tsx
+Error: 
+  x Unexpected token `section`. Expected jsx identifier
+    ,-[/home/asaadabbas/Projects/nebulos-website/src/components/contact.tsx:81:1]
+ 81 |   };
+ 82 | 
+ 83 |   return (
+ 84 |     <section
+    :      ^^^^^^^
+ 85 |       id="contact"
+ 86 |       className="relative bg-black pt-20 lg:pt-32 pb-10 lg:pb-16"
+ 87 |     >
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/contact.tsx
+./src/app/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:34
+[  696485ms] [ERROR] ./src/components/contact.tsx
+Error: 
+  x Unexpected token `section`. Expected jsx identifier
+    ,-[/home/asaadabbas/Projects/nebulos-website/src/components/contact.tsx:81:1]
+ 81 |   };
+ 82 | 
+ 83 |   return (
+ 84 |     <section
+    :      ^^^^^^^
+ 85 |       id="contact"
+ 86 |       className="relative bg-black pt-20 lg:pt-32 pb-10 lg:pb-16"
+ 87 |     >
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/contact.tsx
+./src/app/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:34
+[  704725ms] [ERROR] ./src/components/contact.tsx
+Error: 
+  x Unexpected token `section`. Expected jsx identifier
+    ,-[/home/asaadabbas/Projects/nebulos-website/src/components/contact.tsx:81:1]
+ 81 |   };
+ 82 | 
+ 83 |   return (
+ 84 |     <section
+    :      ^^^^^^^
+ 85 |       id="contact"
+ 86 |       className="relative bg-black pt-20 lg:pt-32 pb-10 lg:pb-16"
+ 87 |     >
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/contact.tsx
+./src/app/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:34
+[  704726ms] [ERROR] ./src/components/contact.tsx
+Error: 
+  x Unexpected token `section`. Expected jsx identifier
+    ,-[/home/asaadabbas/Projects/nebulos-website/src/components/contact.tsx:81:1]
+ 81 |   };
+ 82 | 
+ 83 |   return (
+ 84 |     <section
+    :      ^^^^^^^
+ 85 |       id="contact"
+ 86 |       className="relative bg-black pt-20 lg:pt-32 pb-10 lg:pb-16"
+ 87 |     >
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/contact.tsx
+./src/app/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:34
+[  767547ms] [ERROR] ./src/components/contact.tsx
+Error: 
+  x Unexpected token `section`. Expected jsx identifier
+    ,-[/home/asaadabbas/Projects/nebulos-website/src/components/contact.tsx:81:1]
+ 81 |   };
+ 82 | 
+ 83 |   return (
+ 84 |     <section
+    :      ^^^^^^^
+ 85 |       id="contact"
+ 86 |       className="relative bg-black pt-20 lg:pt-32 pb-10 lg:pb-16"
+ 87 |     >
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/contact.tsx
+./src/app/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:34
+[  769136ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/_next/static/css/app/layout.css?v=1772322814302:0
+[  769160ms] Event

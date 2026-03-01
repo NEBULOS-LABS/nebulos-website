@@ -29,7 +29,7 @@ export default function Contact() {
   // Dynamic beam offset tracking — solves RC-1 (animation timing) and RC-2 (viewport sync)
   const sectionRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-  const [beamOffset, setBeamOffset] = useState({ h: -0.411, v: 0.082 });
+  const [beamOffset, setBeamOffset] = useState({ h: -0.15, v: 0.082 });
 
   const computeBeamOffsets = useCallback(() => {
     const section = sectionRef.current;
@@ -41,7 +41,7 @@ export default function Contact() {
     if (sR.width < 1 || sR.height < 1) return;
 
     const borderRadius = 32; // 2rem
-    const targetX = (cR.left - sR.left) + borderRadius;
+    const targetX = (cR.left - sR.left) + borderRadius + cR.width * 0.20;
     const targetY = (cR.top - sR.top) + borderRadius;
 
     const h = (targetX / sR.width) - 0.5;
@@ -146,10 +146,12 @@ export default function Contact() {
         <LaserFlow
           horizontalBeamOffset={beamOffset.h}
           verticalBeamOffset={beamOffset.v}
-          verticalSizing={1.0}
-          horizontalSizing={0.25}
-          color="#9900ff"
-          fogIntensity={0.5}
+          verticalSizing={0.6}
+          horizontalSizing={0.105}
+          fogIntensity={0.15}
+          fogScale={0.09}
+          falloffStart={0.3}
+          wispIntensity={2.5}
           className=""
           style={{}}
           dpr={undefined}
@@ -186,7 +188,7 @@ export default function Contact() {
               <div ref={cardRef} className="relative rounded-[2rem] p-[1px] overflow-hidden group">
                 {/* Border glow — concentrated at top-left for beam-hugging effect */}
                 <div className="absolute inset-0 bg-gradient-to-b from-[#9900ff]/25 via-[#9900ff]/[0.03] to-transparent z-0" />
-                <div className="absolute top-0 left-0 w-2/3 h-1/2 bg-gradient-to-br from-[#9900ff]/20 to-transparent z-0" />
+                <div className="absolute top-0 left-0 w-2/3 h-1/2 bg-gradient-to-br from-[#00eeff]/20 to-transparent z-0" />
                 <div className="absolute inset-0 bg-gradient-to-r from-[#9900ff]/30 to-[#00eeff]/30 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-700 z-0" />
 
                 <div className="relative z-10 bg-[#0b0b14] rounded-[2rem] p-8 sm:p-10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] overflow-hidden">
