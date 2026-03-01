@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { fadeIn, staggerContainer } from "@/lib/animations";
 import { Send, Mic, FileText, RefreshCw, Mail, Phone } from "lucide-react";
@@ -25,6 +25,56 @@ export default function Contact() {
   const [inputMethod, setInputMethod] = useState<"form" | "voice">("form");
   const [voiceData, setVoiceData] = useState<string | null>(null);
   const [isProcessingVoice, setIsProcessingVoice] = useState(false);
+
+  // Dynamic beam offset tracking — solves RC-1 (animation timing) and RC-2 (viewport sync)
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [beamOffset, setBeamOffset] = useState({ h: -0.411, v: 0.082 });
+
+  const computeBeamOffsets = useCallback(() => {
+    const section = sectionRef.current;
+    const card = cardRef.current;
+    if (!section || !card) return;
+
+    const sR = section.getBoundingClientRect();
+    const cR = card.getBoundingClientRect();
+    if (sR.width < 1 || sR.height < 1) return;
+
+    const borderRadius = 32; // 2rem
+    const targetX = (cR.left - sR.left) + borderRadius;
+    const targetY = (cR.top - sR.top) + borderRadius;
+
+    const h = (targetX / sR.width) - 0.5;
+    const v = 0.5 - (targetY / sR.height);
+    setBeamOffset((prev) =>
+      Math.abs(prev.h - h) < 0.001 && Math.abs(prev.v - v) < 0.001
+        ? prev
+        : { h, v }
+    );
+  }, []);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    const card = cardRef.current;
+    if (!section || !card) return;
+
+    // Safety fallback: measure after Framer Motion animations complete (~0.9s)
+    const timer = setTimeout(computeBeamOffsets, 1200);
+
+    let rafId = 0;
+    const ro = new ResizeObserver(() => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(computeBeamOffsets);
+    });
+    ro.observe(section);
+    ro.observe(card);
+
+    return () => {
+      clearTimeout(timer);
+      cancelAnimationFrame(rafId);
+      ro.disconnect();
+    };
+  }, [computeBeamOffsets]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -82,6 +132,7 @@ export default function Contact() {
 
   return (
     <section
+      ref={sectionRef}
       id="contact"
       className="relative bg-black pt-20 lg:pt-32 pb-10 lg:pb-16"
     >
@@ -89,6 +140,21 @@ export default function Contact() {
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[#9900ff]/5 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-[#00eeff]/5 blur-[120px] rounded-full pointer-events-none" />
+
+      {/* LaserFlow full section background — beam starts from top, contact point half-behind card */}
+      <div className="absolute inset-0 z-[1] overflow-hidden">
+        <LaserFlow
+          horizontalBeamOffset={beamOffset.h}
+          verticalBeamOffset={beamOffset.v}
+          verticalSizing={1.0}
+          horizontalSizing={0.25}
+          color="#9900ff"
+          fogIntensity={0.5}
+          className=""
+          style={{}}
+          dpr={undefined}
+        />
+      </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
         <motion.div
@@ -115,36 +181,17 @@ export default function Contact() {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
 
-            {/* Left side — LaserFlow + Form (Box demo pattern) */}
-            <motion.div variants={fadeIn("right", 0.1)} className="lg:col-span-7">
-              <div className="relative overflow-hidden rounded-[2rem] bg-black">
-                {/* LaserFlow canvas — fills container at z-0, beam center on left side */}
-                <div className="absolute inset-0 z-0">
-                  <LaserFlow
-                    horizontalBeamOffset={-0.35}
-                    verticalBeamOffset={0.0}
-                    color="#9900ff"
-                    fogIntensity={0.55}
-                    className=""
-                    style={{}}
-                    dpr={undefined}
-                  />
-                </div>
+            {/* Left side - Form */}
+            <motion.div variants={fadeIn("right", 0.1)} className="lg:col-span-7" onAnimationComplete={computeBeamOffsets}>
+              <div ref={cardRef} className="relative rounded-[2rem] p-[1px] overflow-hidden group">
+                {/* Border glow — concentrated at top-left for beam-hugging effect */}
+                <div className="absolute inset-0 bg-gradient-to-b from-[#9900ff]/25 via-[#9900ff]/[0.03] to-transparent z-0" />
+                <div className="absolute top-0 left-0 w-2/3 h-1/2 bg-gradient-to-br from-[#9900ff]/20 to-transparent z-0" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#9900ff]/30 to-[#00eeff]/30 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-700 z-0" />
 
-                {/* Beam visibility spacer — beam is prominently visible here */}
-                <div className="h-32 sm:h-40 lg:h-44" />
-
-                {/* Form card at z-[6] — natural document flow, not absolute */}
-                <div className="relative z-[6] mx-3 mb-3">
-                  <div className="relative rounded-[2rem] p-[1px] overflow-hidden group">
-                    {/* Gradient border glow */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-white/[0.02] to-transparent z-0" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#9900ff]/30 to-[#00eeff]/30 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-700 z-0" />
-
-                    <div className="relative z-10 bg-[#0b0b14] rounded-[2rem] p-8 sm:p-10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] overflow-hidden">
-
-                      {/* Internal ambient glow */}
-                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] h-[100px] bg-[#9900ff]/10 blur-[50px] pointer-events-none rounded-full" />
+                <div className="relative z-10 bg-[#0b0b14] rounded-[2rem] p-8 sm:p-10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] overflow-hidden">
+                  {/* Internal ambient glow — shifted to top-left to match beam */}
+                  <div className="absolute -top-5 -left-5 w-[250px] h-[150px] bg-[#9900ff]/12 blur-[50px] pointer-events-none rounded-full" />
 
                       {!formState.submitted ? (
                         <>
@@ -334,14 +381,12 @@ export default function Contact() {
                       )}
                     </div>
                   </div>
-                </div>
-              </div>
             </motion.div>
 
             {/* Right side - Information & Contact alternatives */}
             <motion.div
               variants={fadeIn("left", 0.2)}
-              className="lg:col-span-5 flex flex-col h-full gap-6 lg:pt-44"
+              className="lg:col-span-5 flex flex-col h-full gap-6"
             >
               {/* Premium dark card mimicking DesignCode UI popover/menu style */}
               <div className="relative rounded-[2rem] p-[1px] overflow-hidden group flex-grow">
