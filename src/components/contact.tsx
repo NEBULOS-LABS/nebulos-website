@@ -29,7 +29,7 @@ export default function Contact() {
   // Dynamic beam offset tracking — solves RC-1 (animation timing) and RC-2 (viewport sync)
   const sectionRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-  const [beamOffset, setBeamOffset] = useState({ h: -0.15, v: 0.082 });
+  const [beamOffset, setBeamOffset] = useState({ h: -0.15, v: 0.182 });
 
   const computeBeamOffsets = useCallback(() => {
     const section = sectionRef.current;
@@ -42,7 +42,7 @@ export default function Contact() {
 
     const borderRadius = 32; // 2rem
     const targetX = (cR.left - sR.left) + borderRadius + cR.width * 0.20;
-    const targetY = (cR.top - sR.top) + borderRadius;
+    const targetY = (cR.top - sR.top) + borderRadius - cR.height * 0.10;
 
     const h = (targetX / sR.width) - 0.5;
     const v = 0.5 - (targetY / sR.height);
