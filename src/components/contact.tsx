@@ -26,10 +26,15 @@ export default function Contact() {
   const [voiceData, setVoiceData] = useState<string | null>(null);
   const [isProcessingVoice, setIsProcessingVoice] = useState(false);
 
-  // Dynamic beam offset tracking — solves RC-1 (animation timing) and RC-2 (viewport sync)
+  // Dynamic card-geometry tracking for LaserFlow beam bending
   const sectionRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-  const [beamOffset, setBeamOffset] = useState({ h: -0.15, v: 0.082 });
+  const [beamProps, setBeamProps] = useState({
+    cardTop: 0,
+    cardRight: 0,
+    cardCenter: 0,
+    cornerRadius: 0,
+  });
 
   const computeBeamOffsets = useCallback(() => {
     const section = sectionRef.current;
@@ -40,16 +45,41 @@ export default function Contact() {
     const cR = card.getBoundingClientRect();
     if (sR.width < 1 || sR.height < 1) return;
 
-    const borderRadius = 32; // 2rem
-    const targetX = (cR.left - sR.left) + borderRadius + cR.width * 0.20;
-    const targetY = (cR.top - sR.top) + borderRadius;
+    const borderRadius = 32; // 2rem, matches rounded-[2rem]
 
-    const h = (targetX / sR.width) - 0.5;
-    const v = 0.5 - (targetY / sR.height);
-    setBeamOffset((prev) =>
-      Math.abs(prev.h - h) < 0.001 && Math.abs(prev.v - v) < 0.001
+    // GL coordinate conversion: origin at section center, Y-up
+    const sectionCenterX = sR.width / 2;
+    const sectionCenterY = sR.height / 2;
+
+    // HTML positions relative to section
+    const htmlTop = cR.top - sR.top;
+    const htmlLeft = cR.left - sR.left;
+    // Horizontal arm covers ~50% of card width from the left edge
+    const htmlRight = htmlLeft + cR.width * 0.5;
+    // Beam's vertical centerline = card's left edge
+    const htmlCenterX = htmlLeft;
+
+    // Scale factor: maps HTML pixels to GL shader units (must match shader's sc)
+    const sc = 512.0 / sR.width * 0.4;
+
+    // Convert to GL coordinates
+    // Y-axis: HTML y=0 is top, GL y=0 is center, GL y>0 is up
+    // gl_FragCoord.y=0 at canvas bottom, so top of section = positive GL y
+    const glCardTop = -(htmlTop - sectionCenterY) * sc;
+    const glCardRight = (htmlRight - sectionCenterX) * sc;
+    const glCardCenter = (htmlCenterX - sectionCenterX) * sc;
+    const glRadius = borderRadius * sc;
+
+    // Debug: flat string so values are visible without expanding
+    console.log(`[LaserFlow] section=${sR.width.toFixed(0)}x${sR.height.toFixed(0)} card=(${htmlLeft.toFixed(0)},${htmlTop.toFixed(0)}) => GL top=${glCardTop.toFixed(1)} right=${glCardRight.toFixed(1)} center=${glCardCenter.toFixed(1)} R=${glRadius.toFixed(1)}`);
+
+    setBeamProps((prev) =>
+      Math.abs(prev.cardTop - glCardTop) < 0.01 &&
+      Math.abs(prev.cardRight - glCardRight) < 0.01 &&
+      Math.abs(prev.cardCenter - glCardCenter) < 0.01 &&
+      Math.abs(prev.cornerRadius - glRadius) < 0.01
         ? prev
-        : { h, v }
+        : { cardTop: glCardTop, cardRight: glCardRight, cardCenter: glCardCenter, cornerRadius: glRadius }
     );
   }, []);
 
@@ -57,6 +87,9 @@ export default function Contact() {
     const section = sectionRef.current;
     const card = cardRef.current;
     if (!section || !card) return;
+
+    // Immediate measurement (may be pre-animation position)
+    computeBeamOffsets();
 
     // Safety fallback: measure after Framer Motion animations complete (~0.9s)
     const timer = setTimeout(computeBeamOffsets, 1200);
@@ -144,17 +177,20 @@ export default function Contact() {
       {/* LaserFlow full section background — beam starts from top, contact point half-behind card */}
       <div className="absolute inset-0 z-[1] overflow-hidden">
         <LaserFlow
-          horizontalBeamOffset={beamOffset.h}
-          verticalBeamOffset={beamOffset.v}
-          verticalSizing={0.6}
-          horizontalSizing={0.121}
-          fogIntensity={0.195}
-          fogScale={0.117}
-          falloffStart={0.3}
-          wispIntensity={2.5}
-          className=""
-          style={{}}
-          dpr={undefined}
+          verticalSizing={4.0}
+          horizontalSizing={1.0}
+          fogIntensity={0.25}
+          fogScale={0.05}
+          falloffStart={0.6}
+          wispIntensity={1.2}
+          wispDensity={1}
+          wispSpeed={10}
+          flowSpeed={0.25}
+          flowStrength={0.15}
+          cardTop={beamProps.cardTop}
+          cardRight={beamProps.cardRight}
+          cardCenter={beamProps.cardCenter}
+          cornerRadius={beamProps.cornerRadius}
         />
       </div>
 
